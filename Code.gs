@@ -496,3 +496,138 @@ function toggleStatusMarketplace(rowId, isAktif) {
     return { success: false, message: e.message };
   }
 }
+
+// ==========================================
+// Katalog & Orderan (Lengkap dengan Edit & Hapus)
+// ==========================================
+
+// 1. Fungsi Mengambil Data Master Produk & Master Order
+function getKatalogOrderData() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // A. Ambil Data Master_Produk
+  var sheetProduk = ss.getSheetByName('Master_Produk');
+  var listMasterProduk = [];
+  if (sheetProduk) {
+    var dataProduk = sheetProduk.getDataRange().getValues();
+    for (var i = 1; i < dataProduk.length; i++) {
+      if (dataProduk[i][0]) { 
+        listMasterProduk.push({
+          idProduk: dataProduk[i][0],
+          kodeProduk: dataProduk[i][1] || dataProduk[i][0],
+          namaProduk: dataProduk[i][2],
+          marginTarget: dataProduk[i][3],
+          totalHPP: dataProduk[i][4],
+          hargaJualRekomendasi: dataProduk[i][5] || dataProduk[i][4]
+        });
+      }
+    }
+  }
+
+  // B. Ambil Data Master_Order
+  var sheetOrder = ss.getSheetByName('Master_Order');
+  var listMasterOrder = [];
+  if (sheetOrder) {
+    var dataOrder = sheetOrder.getDataRange().getValues();
+    for (var j = 1; j < dataOrder.length; j++) {
+      if (dataOrder[j][1]) { 
+        listMasterOrder.push({
+          tanggal: dataOrder[j][0],
+          idOrder: dataOrder[j][1],
+          kodeProduk: dataOrder[j][2],
+          namaProduk: dataOrder[j][3],
+          channel: dataOrder[j][4],
+          qty: dataOrder[j][5],
+          totalHPP: dataOrder[j][6],
+          totalLabaBersih: dataOrder[j][7]
+        });
+      }
+    }
+  }
+
+  return {
+    masterProduk: listMasterProduk,
+    masterOrder: listMasterOrder
+  };
+}
+
+// 2. Fungsi Menyimpan & Mengedit Orderan di Sheet 'Master_Order'
+function simpanOrderKeSheet(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Master_Order');
+  
+  // Jika sheet belum ada, buat otomatis beserta header
+  if (!sheet) {
+    sheet = ss.insertSheet('Master_Order');
+    sheet.appendRow([
+      'Tanggal', 
+      'ID_Order', 
+      'Kode_Produk', 
+      'Nama_Produk', 
+      'Channel_Penjualan', 
+      'Qty', 
+      'Total_HPP', 
+      'Total_Laba_Bersih'
+    ]);
+  }
+
+  var dataOrder = sheet.getDataRange().getValues();
+  var barisTarget = -1;
+
+  // Cek apakah ini transaksi EDIT (cari baris berdasarkan ID Order)
+  if (payload.isEdit) {
+    for (var i = 1; i < dataOrder.length; i++) {
+      if (dataOrder[i][1].toString() === payload.idOrder.toString()) { // Kolom ID_Order ada di indeks 1 (Kolom B)
+        barisTarget = i + 1; // +1 karena index spreadsheet dimulai dari 1
+        break;
+      }
+    }
+  }
+
+  var rowData = [
+    payload.tanggal,
+    payload.idOrder,
+    payload.kodeProduk,
+    payload.namaProduk,
+    payload.channel,
+    payload.qty,
+    payload.totalHPP,
+    payload.totalLabaBersih
+  ];
+
+  if (barisTarget > 0) {
+    // JIKA EDIT: Timpa/update data pada baris lama
+    sheet.getRange(barisTarget, 1, 1, rowData.length).setValues([rowData]);
+  } else {
+    // JIKA BARU: Tambahkan baris baru paling bawah
+    sheet.appendRow(rowData);
+  }
+  
+  return { status: 'success' };
+}
+
+// 3. FUNGSI BARU: Menghapus Orderan Berdasarkan ID Order
+function hapusOrderDariSheet(idOrder) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Master_Order');
+  
+  if (!sheet) return { status: 'error', message: 'Sheet tidak ditemukan' };
+
+  var dataOrder = sheet.getDataRange().getValues();
+  var barisYangDihapus = -1;
+
+  // Cari posisi baris berdasarkan ID Order
+  for (var i = 1; i < dataOrder.length; i++) {
+    if (dataOrder[i][1].toString() === idOrder.toString()) {
+      barisYangDihapus = i + 1;
+      break;
+    }
+  }
+
+  if (barisYangDihapus > 0) {
+    sheet.deleteRow(barisYangDihapus);
+    return { status: 'success' };
+  } else {
+    throw new Error("ID Order tidak ditemukan di database!");
+  }
+}
