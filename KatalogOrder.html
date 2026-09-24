@@ -1,153 +1,653 @@
-<!-- KONTEN FITUR KATALOG & TRACKING ORDER -->
-<div class="space-y-6 w-full">
-  
-  <!-- HEADER & FILTER -->
-  <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <div>
-      <h2 class="text-base font-extrabold text-slate-800 uppercase tracking-wider flex items-center">
-        <i class="fas fa-boxes text-amber-600 mr-2.5 text-lg"></i>Katalog Produk & Order Tracking
-      </h2>
-      <p class="text-xs text-slate-500 font-medium mt-1">
-        Daftar produk hasil kalkulasi HPP dan riwayat pesanan pelanggan.
-      </p>
-    </div>
+<!-- KATALOG PRODUK & ORDER TRACKING -->
+<div id="section-katalog-order" class="space-y-6">
 
-    <!-- Tombol & Search -->
-    <div class="flex items-center gap-3 w-full md:w-auto">
-      <div class="relative flex-1 md:w-64">
-        <input type="text" id="search-katalog" onkeyup="filterTabelKatalog()" placeholder="Cari nama produk..." class="w-full pl-9 pr-4 py-2 text-xs bg-slate-100 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
-        <i class="fas fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-      </div>
-      <button onclick="loadKatalogProduk()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs transition shadow-md flex items-center shrink-0">
-        <i class="fas fa-rotate mr-1.5"></i>Refresh
+  <!-- TOP HEADER SECTION -->
+  <div class="bg-white/95 border border-slate-200 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
+    <div>
+      <h2 class="text-sm font-extrabold text-slate-900 flex items-center gap-2 tracking-wide uppercase">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        KATALOG PRODUK & ORDER TRACKING
+      </h2>
+      <p class="text-xs text-slate-700 font-medium mt-0.5">Daftar produk hasil kalkulasi HPP dan riwayat pesanan pelanggan.</p>
+    </div>
+    
+    <div class="flex items-center gap-2 w-full sm:w-auto">
+      <button onclick="bukaModalInputOrder()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Tambah Order
+      </button>
+      <button onclick="loadKatalogDanOrder()" class="bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs px-3 py-2 rounded-xl border border-slate-300 font-bold transition-all flex items-center gap-1 shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Refresh
       </button>
     </div>
   </div>
 
-  <!-- TABEL KATALOG PRODUK JADI -->
-  <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 space-y-4">
-    <div class="flex justify-between items-center border-b border-slate-200/80 pb-3">
-      <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center">
-        <i class="fas fa-list-check text-amber-600 mr-2"></i>Daftar Produk Jadi (Master Produk)
-      </h3>
-      <span id="total-katalog-badge" class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-lg">0 Produk</span>
+  <!-- PANEL FILTER PERIODE WAKTU (BULAN & TAHUN) -->
+  <div class="bg-white/95 border border-slate-200 backdrop-blur-md rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-900">
+    <div class="flex items-center gap-2">
+      <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <span class="text-xs font-black uppercase tracking-wider text-slate-900">Filter Periode Laporan:</span>
+    </div>
+
+    <div class="flex items-center gap-2 w-full sm:w-auto">
+      <select id="filter-bulan" onchange="terapkanFilterDanRender()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+        <option value="ALL">Semua Bulan</option>
+        <option value="01">Januari</option>
+        <option value="02">Februari</option>
+        <option value="03">Maret</option>
+        <option value="04">April</option>
+        <option value="05">Mei</option>
+        <option value="06">Juni</option>
+        <option value="07">Juli</option>
+        <option value="08">Agustus</option>
+        <option value="09">September</option>
+        <option value="10">Oktober</option>
+        <option value="11">November</option>
+        <option value="12">Desember</option>
+      </select>
+
+      <select id="filter-tahun" onchange="terapkanFilterDanRender()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+        <option value="ALL">Semua Tahun</option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- KARTU STATISTIK RINGKASAN -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white/95 border border-slate-200 p-4 rounded-2xl shadow-sm">
+      <div class="text-slate-800 text-[11px] font-bold uppercase tracking-wider">Total Produk Aktif</div>
+      <div id="stat-total-produk" class="text-2xl font-black text-slate-900 mt-1">0 Produk</div>
+    </div>
+    <div class="bg-white/95 border border-slate-200 p-4 rounded-2xl shadow-sm">
+      <div class="text-slate-800 text-[11px] font-bold uppercase tracking-wider">Total Item Terjual (Periode)</div>
+      <div id="stat-total-qty" class="text-2xl font-black text-amber-600 mt-1">0 Pcs</div>
+    </div>
+    <div class="bg-white/95 border border-slate-200 p-4 rounded-2xl shadow-sm">
+      <div class="text-slate-800 text-[11px] font-bold uppercase tracking-wider">Estimasi Laba Bersih (Periode)</div>
+      <div id="stat-total-laba" class="text-2xl font-black text-emerald-600 mt-1">Rp 0</div>
+    </div>
+  </div>
+
+  <!-- TABEL 1: DAFTAR PRODUK JADI (MASTER PRODUK) -->
+  <div class="bg-white/95 border border-slate-200 backdrop-blur-md rounded-2xl p-5 shadow-sm text-slate-900">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 border-b border-slate-200 pb-3">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+        <h3 class="text-xs font-black text-slate-900 tracking-wider uppercase">DAFTAR PRODUK JADI (MASTER PRODUK)</h3>
+        <span id="badge-total-master" class="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-2 py-0.5 rounded-full border border-amber-300">0 Produk</span>
+      </div>
+
+      <div class="relative flex-1 sm:w-64">
+        <input type="text" id="search-katalog-produk" onkeyup="filterTabelMasterProduk()" placeholder="Cari kode atau nama produk..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 pl-8 text-xs font-semibold text-slate-900 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:bg-white transition-all">
+        <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50">
-            <th class="p-3">ID Produk</th>
-            <th class="p-3">Nama Produk</th>
-            <th class="p-3 text-right">Total HPP (Modal)</th>
-            <th class="p-3 text-center">Margin (%)</th>
-            <th class="p-3 text-right">Harga Jual</th>
-            <th class="p-3 text-center">Aksi</th>
+      <table class="w-full text-left text-xs text-slate-900">
+        <thead class="bg-slate-100 text-slate-900 font-black uppercase text-[10px] tracking-wider border-b-2 border-slate-300">
+          <tr>
+            <th class="py-2.5 px-3">KODE PRODUK</th>
+            <th class="py-2.5 px-3">NAMA PRODUK</th>
+            <th class="py-2.5 px-3 text-right">TOTAL HPP (MODAL)</th>
+            <th class="py-2.5 px-3 text-center">MARGIN (%)</th>
+            <th class="py-2.5 px-3 text-right">HARGA JUAL (OFFLINE)</th>
+            <th class="py-2.5 px-3 text-center">AKSI</th>
           </tr>
         </thead>
-        <tbody id="tbody-katalog-produk" class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+        <tbody id="tbody-master-produk" class="divide-y divide-slate-200 font-bold">
           <tr>
-            <td colspan="6" class="p-6 text-center text-slate-400 italic">
-              <i class="fas fa-spinner fa-spin mr-2"></i>Memuat data katalog produk...
-            </td>
+            <td colspan="6" class="py-6 text-center text-slate-600 italic font-medium">Memuat data master produk...</td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- PAGINATION PRODUK -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-2 mt-4 pt-3 border-t border-slate-200 text-xs text-slate-900 font-bold">
+      <span id="info-pagination-produk" class="text-slate-700">Halaman 1 dari 1</span>
+      <div class="flex items-center gap-1">
+        <button onclick="gantiHalamanProduk(-1)" id="btn-prev-produk" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg disabled:opacity-40 transition-all">Sebelumnya</button>
+        <button onclick="gantiHalamanProduk(1)" id="btn-next-produk" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg disabled:opacity-40 transition-all">Selanjutnya</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABEL 2: RIWAYAT PESANAN PELANGGAN (MASTER ORDER) -->
+  <div class="bg-white/95 border border-slate-200 backdrop-blur-md rounded-2xl p-5 shadow-sm text-slate-900">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 border-b border-slate-200 pb-3">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+        <h3 class="text-xs font-black text-slate-900 tracking-wider uppercase">RIWAYAT PESANAN & LABA BERSIH (MASTER ORDER)</h3>
+        <span id="badge-total-order" class="text-[10px] bg-emerald-100 text-emerald-900 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300">0 Orderan</span>
+      </div>
+
+      <div class="relative flex-1 sm:w-64">
+        <input type="text" id="search-katalog-order" onkeyup="filterTabelMasterOrder()" placeholder="Cari ID order, nama, atau channel..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 pl-8 text-xs font-semibold text-slate-900 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:bg-white transition-all">
+        <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-900">
+        <thead class="bg-slate-100 text-slate-900 font-black uppercase text-[10px] tracking-wider border-b-2 border-slate-300">
+          <tr>
+            <th class="py-2.5 px-3">TANGGAL</th>
+            <th class="py-2.5 px-3">ID ORDER</th>
+            <th class="py-2.5 px-3">NAMA PRODUK</th>
+            <th class="py-2.5 px-3 text-center">CHANNEL</th>
+            <th class="py-2.5 px-3 text-center">QTY</th>
+            <th class="py-2.5 px-3 text-right">TOTAL HPP</th>
+            <th class="py-2.5 px-3 text-right">EST. LABA BERSIH</th>
+            <th class="py-2.5 px-3 text-center">AKSI</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-master-order" class="divide-y divide-slate-200 font-bold">
+          <tr>
+            <td colspan="8" class="py-6 text-center text-slate-600 italic font-medium">Belum ada riwayat orderan dicatat.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION ORDER -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-2 mt-4 pt-3 border-t border-slate-200 text-xs text-slate-900 font-bold">
+      <span id="info-pagination-order" class="text-slate-700">Halaman 1 dari 1</span>
+      <div class="flex items-center gap-1">
+        <button onclick="gantiHalamanOrder(-1)" id="btn-prev-order" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg disabled:opacity-40 transition-all">Sebelumnya</button>
+        <button onclick="gantiHalamanOrder(1)" id="btn-next-order" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg disabled:opacity-40 transition-all">Selanjutnya</button>
+      </div>
     </div>
   </div>
 
 </div>
 
+<!-- MODAL POPUP INPUT & EDIT ORDERAN -->
+<div id="modal-input-order" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+  <div class="bg-white border border-slate-300 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4 text-slate-900">
+    <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+      <h3 id="modal-title-order" class="text-xs font-black text-slate-900 tracking-wider uppercase flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+        CATAT ORDERAN MASUK
+      </h3>
+      <button onclick="tutupModalInputOrder()" class="text-slate-500 hover:text-slate-900 font-black">✕</button>
+    </div>
+
+    <input type="hidden" id="modal-input-id-order">
+
+    <div class="space-y-3">
+      <div>
+        <label class="text-[11px] font-bold text-slate-900 mb-1 block">Tanggal Transaksi</label>
+        <input type="date" id="modal-input-tanggal" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+      </div>
+
+      <div>
+        <label class="text-[11px] font-bold text-slate-900 mb-1 block">Pilih Produk</label>
+        <select id="modal-select-produk" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+          <option value="">-- Pilih Produk --</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-[11px] font-bold text-slate-900 mb-1 block">Channel Penjualan</label>
+        <select id="modal-select-channel" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+          <option value="Offline / WA">Offline / Direct WA</option>
+          <option value="Shopee">Shopee</option>
+          <option value="TikTok Shop">TikTok Shop</option>
+          <option value="Tokopedia">Tokopedia</option>
+          <option value="Facebook">Facebook / Instagram</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-[11px] font-bold text-slate-900 mb-1 block">Jumlah Terjual (Qty)</label>
+        <input type="number" id="modal-input-qty" value="1" min="1" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+      <button onclick="tutupModalInputOrder()" class="bg-slate-200 text-slate-900 font-bold text-xs px-4 py-2 rounded-xl hover:bg-slate-300 transition-all">Batal</button>
+      <button onclick="simpanOrderanBaru()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm">Simpan Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL POPUP KONFIRMASI HAPUS CUSTOM (MODERN) -->
+<div id="modal-konfirmasi-hapus" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+  <div class="bg-white border border-slate-300 rounded-2xl w-full max-w-sm p-5 shadow-2xl space-y-4 text-slate-900 text-center">
+    <div class="w-12 h-12 bg-rose-100 border border-rose-300 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </div>
+    
+    <div>
+      <h3 class="text-sm font-black text-slate-900 tracking-wider uppercase">HAPUS ORDERAN?</h3>
+      <p class="text-xs text-slate-600 font-medium mt-1">Apakah Anda yakin ingin menghapus transaksi <span id="label-id-order-hapus" class="font-mono font-bold text-slate-900"></span>? Tindakan ini tidak dapat dibatalkan.</p>
+    </div>
+
+    <input type="hidden" id="target-id-order-hapus">
+
+    <div class="flex items-center justify-center gap-2 pt-2">
+      <button onclick="tutupModalHapusOrder()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-300 transition-all">Batal</button>
+      <button onclick="eksekusiHapusOrder()" class="w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition-all">Ya, Hapus</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  // Dynamic Handler untuk memuat data katalog saat tab aktif
-  document.addEventListener("DOMContentLoaded", function() {
-    loadKatalogProduk();
+window.dataKatalogMaster = [];
+window.dataOrderMaster = [];
+
+// DATA AKTIF DAN PAGINATION
+window.filteredProduk = [];
+window.filteredOrder = [];
+
+window.pageProduk = 1;
+window.limitProduk = 5;
+
+window.pageOrder = 1;
+window.limitOrder = 5;
+
+// SCRIPT INISIALISASI & LOAD DATA
+function loadKatalogDanOrder() {
+  if (typeof showLoading === 'function') showLoading("Memuat Data...", "Mengambil daftar master produk & orderan");
+  
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run.withSuccessHandler(function(res) {
+      if (typeof hideLoading === 'function') hideLoading();
+      if (res) {
+        window.dataKatalogMaster = res.masterProduk || [];
+        window.dataOrderMaster = res.masterOrder || [];
+        
+        // Auto set filter tahun & bulan ke bulan saat ini (jika belum diatur)
+        const yNow = new Date().getFullYear().toString();
+        const mNow = String(new Date().getMonth() + 1).padStart(2, '0');
+        
+        const selectTahun = document.getElementById('filter-tahun');
+        const selectBulan = document.getElementById('filter-bulan');
+
+        if (selectTahun && selectTahun.value === 'ALL') selectTahun.value = yNow;
+        if (selectBulan && selectBulan.value === 'ALL') selectBulan.value = mNow;
+
+        // 🔥 INI KUNCI UTAMA YANG KURANG: Jalankan filter langsung setelah data masuk!
+        terapkanFilterDanRender();
+        
+        populateDropdownProdukModal();
+      }
+    }).withFailureHandler(function(err) {
+      if (typeof hideLoading === 'function') hideLoading();
+      tampilkanPesanFeedback('Gagal memuat data katalog: ' + err.message, 'error');
+    }).getKatalogOrderData();
+  } else {
+    if (typeof hideLoading === 'function') hideLoading();
+  }
+}
+// LOGIKA FILTER PERIODE BULAN DAN TAHUN
+function terapkanFilterDanRender() {
+  const selectedBulan = document.getElementById('filter-bulan').value; 
+  const selectedTahun = document.getElementById('filter-tahun').value; 
+
+  // 1. Filter Master Produk (pencarian)
+  if (typeof filterTabelMasterProduk === 'function') filterTabelMasterProduk();
+
+  // 2. Filter Master Order berdasarkan Bulan & Tahun
+  window.filteredOrder = window.dataOrderMaster.filter(o => {
+    if (!o.tanggal) return false;
+
+    let rawTgl = o.tanggal.toString().trim();
+    let parts = [];
+
+    if (rawTgl.includes('/')) {
+      parts = rawTgl.split('/'); 
+    } else if (rawTgl.includes('-')) {
+      parts = rawTgl.split('-'); 
+    }
+
+    if (parts.length < 3) return false;
+
+    let tglBulan = "";
+    let tglTahun = "";
+
+    if (parts[0].length === 4) {
+      tglTahun = parts[0];
+      tglBulan = parts[1].padStart(2, '0');
+    } else {
+      tglBulan = parts[1].padStart(2, '0');
+      tglTahun = parts[2].trim();
+    }
+
+    const matchBulan = (selectedBulan === 'ALL' || tglBulan === selectedBulan);
+    const matchTahun = (selectedTahun === 'ALL' || tglTahun === selectedTahun);
+    
+    return matchBulan && matchTahun;
   });
 
-  // Fungsi memuat data dari Sheet Master_Produk
-  function loadKatalogProduk() {
-    const tbody = document.getElementById("tbody-katalog-produk");
-    if (!tbody) return;
+  // 3. 🔥 PERBAIKAN UTAMA: Wajib panggil render tabel order & statistik agar layar ikut berubah!
+  window.pageOrder = 1; // Reset ke halaman 1
+  
+  if (typeof filterTabelMasterOrder === 'function' && document.getElementById('search-katalog-order').value) {
+    filterTabelMasterOrder();
+  } else {
+    renderTabelMasterOrder(); // Tampilkan data yang sudah difilter ke tabel
+  }
+  
+  // Perbarui kartu statistik angka di atas
+  updateStatistikKatalog();
+}
 
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" class="p-6 text-center text-slate-400 italic">
-          <i class="fas fa-spinner fa-spin mr-2 text-amber-600"></i>Mengambil data produk dari database...
+// RENDER TABEL MASTER PRODUK (+ PAGINATION)
+function renderTabelMasterProduk() {
+  const tbody = document.getElementById('tbody-master-produk');
+  const list = window.filteredProduk;
+  document.getElementById('badge-total-master').innerText = `${window.dataKatalogMaster.length} Produk`;
+
+  if (!list || list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-600 italic font-medium">Tidak ada produk ditemukan.</td></tr>`;
+    document.getElementById('info-pagination-produk').innerText = 'Halaman 0 dari 0';
+    document.getElementById('btn-prev-produk').disabled = true;
+    document.getElementById('btn-next-produk').disabled = true;
+    return;
+  }
+
+  const totalPages = Math.ceil(list.length / window.limitProduk);
+  if (window.pageProduk > totalPages) window.pageProduk = totalPages;
+  if (window.pageProduk < 1) window.pageProduk = 1;
+
+  const startIdx = (window.pageProduk - 1) * window.limitProduk;
+  const pageData = list.slice(startIdx, startIdx + window.limitProduk);
+
+  let html = '';
+  pageData.forEach(item => {
+    const kode = item.kodeProduk || item.idProduk;
+    html += `
+      <tr class="hover:bg-slate-100 transition-all border-b border-slate-200">
+        <td class="py-2.5 px-3 font-mono font-black text-amber-600">${kode}</td>
+        <td class="py-2.5 px-3 font-bold text-slate-900">${item.namaProduk}</td>
+        <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">Rp ${(parseFloat(item.totalHPP)||0).toLocaleString('id-ID')}</td>
+        <td class="py-2.5 px-3 text-center"><span class="bg-emerald-100 text-emerald-900 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-300">${item.marginTarget}%</span></td>
+        <td class="py-2.5 px-3 text-right font-mono font-black text-slate-900">Rp ${(parseFloat(item.hargaJualRekomendasi || item.hargaJualOffline)||0).toLocaleString('id-ID')}</td>
+        <td class="py-2.5 px-3 text-center">
+          <button onclick="bukaInputOrderSpesifik('${kode}')" title="Catat Order" class="text-amber-700 hover:text-amber-900 p-1 bg-amber-100 rounded-lg border border-amber-300 hover:bg-amber-200 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </button>
         </td>
       </tr>
     `;
+  });
+  tbody.innerHTML = html;
 
-    google.script.run
-      .withSuccessHandler(renderTabelKatalog)
-      .withFailureHandler(err => {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="p-4 text-center text-rose-500 font-bold">
-              Gagal memuat data: ${err.message}
-            </td>
-          </tr>
-        `;
-      })
-      .getMasterProdukData(); // Fungsi backend di Code.gs
+  document.getElementById('info-pagination-produk').innerText = `Halaman ${window.pageProduk} dari ${totalPages}`;
+  document.getElementById('btn-prev-produk').disabled = (window.pageProduk === 1);
+  document.getElementById('btn-next-produk').disabled = (window.pageProduk === totalPages);
+}
+
+function gantiHalamanProduk(direction) {
+  window.pageProduk += direction;
+  renderTabelMasterProduk();
+}
+
+// RENDER TABEL MASTER ORDER (+ PAGINATION & TOMBOL EDIT/HAPUS)
+function renderTabelMasterOrder() {
+  const tbody = document.getElementById('tbody-master-order');
+  const list = window.filteredOrder;
+  document.getElementById('badge-total-order').innerText = `${list.length} Orderan`;
+
+  if (!list || list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-600 italic font-medium">Belum ada riwayat orderan untuk periode ini.</td></tr>`;
+    document.getElementById('info-pagination-order').innerText = 'Halaman 0 dari 0';
+    document.getElementById('btn-prev-order').disabled = true;
+    document.getElementById('btn-next-order').disabled = true;
+    return;
   }
 
-  // Render Data ke Tabel Katalog
-  function renderTabelKatalog(data) {
-    const tbody = document.getElementById("tbody-katalog-produk");
-    const badge = document.getElementById("total-katalog-badge");
+  const totalPages = Math.ceil(list.length / window.limitOrder);
+  if (window.pageOrder > totalPages) window.pageOrder = totalPages;
+  if (window.pageOrder < 1) window.pageOrder = 1;
 
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="p-6 text-center text-slate-400 italic">
-            Belum ada produk tersimpan. Hitung & Simpan Produk baru dari menu Kalkulator HPP.
-          </td>
-        </tr>
-      `;
-      if (badge) badge.innerText = "0 Produk";
-      return;
+  const startIdx = (window.pageOrder - 1) * window.limitOrder;
+  const pageData = list.slice(startIdx, startIdx + window.limitOrder);
+
+  let html = '';
+  pageData.forEach(item => {
+    html += `
+      <tr class="hover:bg-slate-100 transition-all border-b border-slate-200">
+        <td class="py-2.5 px-3 text-slate-900 font-bold text-[11px]">${item.tanggal}</td>
+        <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${item.idOrder}</td>
+        <td class="py-2.5 px-3 font-bold text-slate-900">${item.namaProduk}</td>
+        <td class="py-2.5 px-3 text-center"><span class="bg-slate-200 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-md border border-slate-300">${item.channel}</span></td>
+        <td class="py-2.5 px-3 text-center font-black text-amber-600">${item.qty}</td>
+        <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">Rp ${(parseFloat(item.totalHPP)||0).toLocaleString('id-ID')}</td>
+        <td class="py-2.5 px-3 text-right font-mono font-black text-emerald-600">Rp ${(parseFloat(item.totalLabaBersih)||0).toLocaleString('id-ID')}</td>
+        <td class="py-2.5 px-3 text-center flex items-center justify-center gap-1">
+          <button onclick="editOrderan('${item.idOrder}')" title="Edit Order" class="p-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg border border-amber-300 transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </button>
+          <button onclick="hapusOrderan('${item.idOrder}')" title="Hapus Order" class="p-1 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg border border-rose-300 transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+
+  document.getElementById('info-pagination-order').innerText = `Halaman ${window.pageOrder} dari ${totalPages}`;
+  document.getElementById('btn-prev-order').disabled = (window.pageOrder === 1);
+  document.getElementById('btn-next-order').disabled = (window.pageOrder === totalPages);
+}
+
+function gantiHalamanOrder(direction) {
+  window.pageOrder += direction;
+  renderTabelMasterOrder();
+}
+
+// STATISTIK RINGKASAN SESUAI FILTER PERIODE
+function updateStatistikKatalog() {
+  const totalProduk = window.dataKatalogMaster.length;
+  let totalQty = 0;
+  let totalLaba = 0;
+
+  window.filteredOrder.forEach(o => {
+    totalQty += parseInt(o.qty || 0);
+    totalLaba += parseFloat(o.totalLabaBersih || 0);
+  });
+
+  document.getElementById('stat-total-produk').innerText = `${totalProduk} Produk`;
+  document.getElementById('stat-total-qty').innerText = `${totalQty} Pcs`;
+  document.getElementById('stat-total-laba').innerText = `Rp ${totalLaba.toLocaleString('id-ID')}`;
+}
+
+// DROPDOWN POPULATE
+function populateDropdownProdukModal() {
+  const select = document.getElementById('modal-select-produk');
+  select.innerHTML = '<option value="">-- Pilih Produk --</option>';
+  
+  window.dataKatalogMaster.forEach(p => {
+    const kode = p.kodeProduk || p.idProduk;
+    select.innerHTML += `<option value="${kode}">${kode} - ${p.namaProduk}</option>`;
+  });
+}
+
+// HANDLER MODAL INPUT / EDIT
+function bukaModalInputOrder() {
+  document.getElementById('modal-title-order').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> CATAT ORDERAN MASUK`;
+  document.getElementById('modal-input-id-order').value = '';
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('modal-input-tanggal').value = today;
+  document.getElementById('modal-select-produk').value = '';
+  document.getElementById('modal-select-channel').value = 'Offline / WA';
+  document.getElementById('modal-input-qty').value = '1';
+  document.getElementById('modal-input-order').classList.remove('hidden');
+}
+
+function tutupModalInputOrder() {
+  document.getElementById('modal-input-order').classList.add('hidden');
+}
+
+function bukaInputOrderSpesifik(kodeProduk) {
+  bukaModalInputOrder();
+  document.getElementById('modal-select-produk').value = kodeProduk;
+}
+
+function editOrderan(idOrder) {
+  const order = window.dataOrderMaster.find(o => o.idOrder === idOrder);
+  if (!order) return;
+
+  document.getElementById('modal-title-order').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> EDIT ORDERAN (${idOrder})`;
+  document.getElementById('modal-input-id-order').value = order.idOrder;
+
+  // Format dd/mm/yyyy -> yyyy-mm-dd untuk input date
+  if (order.tanggal) {
+    const parts = order.tanggal.split('/');
+    if (parts.length === 3) {
+      document.getElementById('modal-input-tanggal').value = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
     }
-
-    if (badge) badge.innerText = `${data.length} Produk`;
-
-    let html = "";
-    data.forEach((item, index) => {
-      html += `
-        <tr class="hover:bg-slate-50/80 transition">
-          <td class="p-3 font-mono font-bold text-amber-600">${item.id || 'PRD-' + (index + 1)}</td>
-          <td class="p-3 font-bold text-slate-800">${item.namaProduk}</td>
-          <td class="p-3 text-right font-mono text-slate-600">Rp ${formatRupiahText(item.totalHpp)}</td>
-          <td class="p-3 text-center">
-            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md">
-              ${item.marginPersen}%
-            </span>
-          </td>
-          <td class="p-3 text-right font-mono font-black text-amber-600 text-sm">Rp ${formatRupiahText(item.hargaJual)}</td>
-          <td class="p-3 text-center space-x-1">
-            <button onclick="lihatDetailBOM(${index})" title="Lihat Rincian BOM" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
-              <i class="fas fa-eye text-xs"></i>
-            </button>
-          </td>
-        </tr>
-      `;
-    });
-
-    tbody.innerHTML = html;
   }
 
-  // Filter pencarian tabel
-  function filterTabelKatalog() {
-    const input = document.getElementById('search-katalog').value.toLowerCase();
-    const rows = document.querySelectorAll('#tbody-katalog-produk tr');
+  document.getElementById('modal-select-produk').value = order.kodeProduk || '';
+  document.getElementById('modal-select-channel').value = order.channel || 'Offline / WA';
+  document.getElementById('modal-input-qty').value = order.qty || 1;
 
-    rows.forEach(row => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(input) ? '' : 'none';
-    });
+  document.getElementById('modal-input-order').classList.remove('hidden');
+}
+
+// SIMPAN ATAU UPDATE ORDERAN KE GOOGLE SHEETS
+function simpanOrderanBaru() {
+  const existingIdOrder = document.getElementById('modal-input-id-order').value;
+  const rawTanggal = document.getElementById('modal-input-tanggal').value;
+  const kodeProduk = document.getElementById('modal-select-produk').value;
+  const channel = document.getElementById('modal-select-channel').value;
+  const qty = parseInt(document.getElementById('modal-input-qty').value) || 0;
+
+  if (!rawTanggal || !kodeProduk || !channel || qty <= 0) {
+    tampilkanPesanFeedback('Mohon lengkapi tanggal, produk, channel, dan Qty!', 'error');
+    return;
   }
 
-  // Helper Format Angka
-  function formatRupiahText(angka) {
-    return Number(angka || 0).toLocaleString('id-ID');
+  const [year, month, day] = rawTanggal.split('-');
+  const tanggalFormatted = `${day}/${month}/${year}`;
+
+  const produkSelected = window.dataKatalogMaster.find(p => (p.kodeProduk || p.idProduk) === kodeProduk);
+  if (!produkSelected) {
+    tampilkanPesanFeedback('Data produk tidak ditemukan!', 'error');
+    return;
   }
+
+  const hppSatuan = parseFloat(produkSelected.totalHPP) || 0;
+  const hargaJualOffline = parseFloat(produkSelected.hargaJualRekomendasi || produkSelected.hargaJualOffline) || 0;
+  
+  const labaBersihPerPcs = hargaJualOffline - hppSatuan;
+  const totalHPP = hppSatuan * qty;
+  const totalLabaBersih = labaBersihPerPcs * qty;
+
+  const payload = {
+    tanggal: tanggalFormatted,
+    idOrder: existingIdOrder ? existingIdOrder : ('ORD-' + Date.now().toString().slice(-6)),
+    kodeProduk: kodeProduk,
+    namaProduk: produkSelected.namaProduk,
+    channel: channel,
+    qty: qty,
+    totalHPP: totalHPP,
+    totalLabaBersih: totalLabaBersih,
+    isEdit: Boolean(existingIdOrder)
+  };
+
+  if (typeof showLoading === 'function') {
+    showLoading(existingIdOrder ? "Memperbarui Order..." : "Menyimpan Order...", "Mencatat transaksi ke database Google Sheets");
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (typeof hideLoading === 'function') hideLoading();
+        tampilkanPesanFeedback(existingIdOrder ? 'Orderan berhasil diperbarui!' : 'Orderan berhasil dicatat!', 'success');
+        tutupModalInputOrder();
+        loadKatalogDanOrder();
+      })
+      .withFailureHandler(function(err) {
+        if (typeof hideLoading === 'function') hideLoading();
+        tampilkanPesanFeedback('Gagal menyimpan orderan: ' + err.message, 'error');
+      })
+      .simpanOrderKeSheet(payload);
+  }
+}
+
+// HANDLER MODAL HAPUS CUSTOM (TANPA POPUP DEFAULT BROWSER)
+function hapusOrderan(idOrder) {
+  document.getElementById('label-id-order-hapus').innerText = idOrder;
+  document.getElementById('target-id-order-hapus').value = idOrder;
+  document.getElementById('modal-konfirmasi-hapus').classList.remove('hidden');
+}
+
+function tutupModalHapusOrder() {
+  document.getElementById('modal-konfirmasi-hapus').classList.add('hidden');
+}
+
+function eksekusiHapusOrder() {
+  const idOrder = document.getElementById('target-id-order-hapus').value;
+  if (!idOrder) return;
+
+  tutupModalHapusOrder();
+
+  if (typeof showLoading === 'function') {
+    showLoading("Menghapus Order...", "Menghapus transaksi dari database Google Sheets");
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (typeof hideLoading === 'function') hideLoading();
+        tampilkanPesanFeedback(`Orderan ${idOrder} berhasil dihapus!`, 'success');
+        loadKatalogDanOrder();
+      })
+      .withFailureHandler(function(err) {
+        if (typeof hideLoading === 'function') hideLoading();
+        tampilkanPesanFeedback('Gagal menghapus orderan: ' + err.message, 'error');
+      })
+      .hapusOrderDariSheet(idOrder);
+  }
+}
+
+// FITUR PENCARIAN FLEKSIBEL
+function filterTabelMasterProduk() {
+  const query = document.getElementById('search-katalog-produk').value.toLowerCase();
+  window.filteredProduk = window.dataKatalogMaster.filter(p => {
+    const kode = (p.kodeProduk || p.idProduk || '').toLowerCase();
+    const nama = (p.namaProduk || '').toLowerCase();
+    return kode.includes(query) || nama.includes(query);
+  });
+  window.pageProduk = 1;
+  renderTabelMasterProduk();
+}
+
+function filterTabelMasterOrder() {
+  const query = document.getElementById('search-katalog-order').value.toLowerCase();
+  const baseList = window.filteredOrder.length > 0 ? window.filteredOrder : window.dataOrderMaster;
+  
+  const searched = baseList.filter(o => {
+    const idOrder = (o.idOrder || '').toLowerCase();
+    const nama = (o.namaProduk || '').toLowerCase();
+    const channel = (o.channel || '').toLowerCase();
+    const kode = (o.kodeProduk || '').toLowerCase();
+    return idOrder.includes(query) || nama.includes(query) || channel.includes(query) || kode.includes(query);
+  });
+
+  window.filteredOrder = searched;
+  window.pageOrder = 1;
+  renderTabelMasterOrder();
+}
+
+// BANTUAN UMUM PEMBERITAHUAN
+function tampilkanPesanFeedback(pesan, tipe) {
+  if (typeof showToast === 'function') {
+    showToast(pesan, tipe);
+  } else if (typeof showAlertNotification === 'function') {
+    showAlertNotification(pesan, tipe);
+  } else {
+    console.log(`[${tipe.toUpperCase()}] ${pesan}`);
+  }
+}
 </script>
