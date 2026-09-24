@@ -1,0 +1,498 @@
+// ==========================================================
+// BACKEND GOOGLE APPS SCRIPT - BUBI PROJECT (HPP CALCULATOR)
+// ==========================================================
+
+function getDb() {
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+function doGet() {
+  return HtmlService.createTemplateFromFile('Index')
+    .evaluate()
+    .setTitle('Bubi project - HPP Calculator')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// Helper untuk load file HTML modular
+function include(filename) {
+  return HtmlService.createTemplateFromFile(filename).getRawContent();
+}
+
+// --- AMBIL SEMUA DATA UNTUK INISIALISASI APLIKASI ---
+function getInitialData() {
+  const db = getDb();
+  return {
+    bahan: getSheetDataAsObject(db.getSheetByName('Master_Bahan')),
+    mesin: getSheetDataAsObject(db.getSheetByName('Master_Mesin')),
+    produk: getSheetDataAsObject(db.getSheetByName('Master_Produk'))
+  };
+}
+
+function getSheetDataAsObject(sheet) {
+  if (!sheet) return [];
+  const data = sheet.getDataRange().getDisplayValues();
+  if (data.length <= 1) return [];
+  const headers = data[0];
+  const result = [];
+  for (let i = 1; i < data.length; i++) {
+    let obj = {};
+    for (let j = 0; j < headers.length; j++) {
+      obj[headers[j]] = data[i][j];
+    }
+    result.push(obj);
+  }
+  return result;
+}
+
+// ==========================================
+// HELPER: GENERATE AUTO INCREMENT ID (PRD-001, BHN-001, Dst)
+// ==========================================
+function generateAutoId(sheetName, prefix) {
+  const ss = getDb();
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return prefix + "-001";
+  
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) {
+    return prefix + "-001";
+  }
+  
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  let maxNum = 0;
+  
+  ids.forEach(function(row) {
+    const idStr = String(row[0]);
+    if (idStr && idStr.indexOf(prefix + "-") !== -1) {
+      const parts = idStr.split("-");
+      const num = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(num) && num > maxNum) {
+        maxNum = num;
+      }
+    }
+  });
+  
+  const nextNum = maxNum + 1;
+  return prefix + "-" + String(nextNum).padStart(3, '0');
+}
+
+// Helper untuk konversi currency/string ke angka murni
+function parseCurrencyToNumber(val) {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  
+  var str = String(val).trim();
+  var cleaned = str.replace(/Rp|\s/g, '').replace(/\./g, '').replace(',', '.');
+  var num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
+// --- 1. SIMPAN MASTER BAHAN BAKU ---
+function simpanBahanKeSheet(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var ss = getDb();
+    var sheet = ss.getSheetByName('Master_Bahan');
+    
+    var idBahan = generateAutoId('Master_Bahan', 'BHN');
+    var hargaBeli = parseFloat(payload.hargaBeli) || 0;
+    var p = parseFloat(payload.p) || 0;
+    var l = parseFloat(payload.l) || 0;
+    var volume = parseFloat(payload.volume) || 0;
+    var berat = parseFloat(payload.berat) || 0;
+    var pcs = parseFloat(payload.pcs) || 0;
+
+    var hargaSatuanDasar = 0;
+    if (payload.tipe === 'Lembaran' && p > 0 && l > 0) {
+      hargaSatuanDasar = hargaBeli / (p * l);
+    } else if (payload.tipe === 'Panjang' && p > 0) {
+      hargaSatuanDasar = hargaBeli / p;
+    } else if (payload.tipe === 'Cairan' && volume > 0) {
+      hargaSatuanDasar = hargaBeli / volume;
+    } else if (payload.tipe === 'Satuan' && pcs > 0) {
+      hargaSatuanDasar = hargaBeli / pcs;
+    } else if (payload.tipe === 'Berat' && berat > 0) {
+      hargaSatuanDasar = hargaBeli / berat;
+    } else {
+      hargaSatuanDasar = hargaBeli;
+    }
+
+    sheet.appendRow([
+      idBahan,
+      payload.nama,
+      payload.tipe,
+      payload.tipe,
+      hargaBeli,
+      p,
+      l,
+      volume,
+      berat,
+      pcs,
+      Number(hargaSatuanDasar)
+    ]);
+
+    return { status: "success", message: "Bahan berhasil disimpan dengan ID: " + idBahan };
+  } catch (e) {
+    return { status: "error", message: e.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// --- 2. SIMPAN MASTER MESIN ---
+function simpanMesinKeSheet(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var ss = getDb();
+    var sheet = ss.getSheetByName('Master_Mesin');
+    
+    var idMesin = generateAutoId('Master_Mesin', 'MSN');
+    var biayaDepresiasiPerJam = payload.umurJam > 0 ? (payload.hargaBeli / payload.umurJam) : 0;
+    var biayaListrikPerJam = (payload.watt / 1000) * payload.tarifKwh;
+    var totalBiayaPerJam = biayaDepresiasiPerJam + biayaListrikPerJam;
+    var biayaPerMenit = totalBiayaPerJam / 60;
+
+    sheet.appendRow([
+      idMesin,
+      payload.nama,
+      payload.hargaBeli,
+      payload.umurJam,
+      payload.watt,
+      payload.tarifKwh,
+      biayaPerMenit
+    ]);
+
+    return { status: "success", message: "Mesin berhasil disimpan dengan ID: " + idMesin };
+  } catch (e) {
+    return { status: "error", message: e.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// --- 3. SIMPAN PRODUK LENGKAP BERSAMA BOM ---
+function simpanProdukKeSheet(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    const ss = getDb();
+    
+    const sheetMaster = ss.getSheetByName('Master_Produk');
+    const idProduk = generateAutoId('Master_Produk', 'PRD');
+    const kodeProduk = payload.kodeProduk || idProduk;
+    
+    sheetMaster.appendRow([
+      idProduk,
+      kodeProduk,
+      payload.namaProduk,
+      payload.marginTarget || payload.marginTargetPersen || 0,
+      parseCurrencyToNumber(payload.totalHPP),
+      parseCurrencyToNumber(payload.hargaJual),
+      new Date()
+    ]);
+
+    const sheetDetailBahan = ss.getSheetByName('Detail_BOM_Bahan');
+    if (payload.detailBahan && payload.detailBahan.length > 0) {
+      payload.detailBahan.forEach(function(item) {
+        const idDetailBahan = generateAutoId('Detail_BOM_Bahan', 'BOMB');
+        const subtotalBiaya = parseCurrencyToNumber(item.subtotal);
+
+        sheetDetailBahan.appendRow([
+          idDetailBahan,
+          idProduk,
+          item.idBahan,
+          item.panjang || item.panjangPakai || 0,
+          item.lebar || item.lebarPakai || 0,
+          item.pemakaianMlGram || item.pemakaian || 0,
+          item.qtyLayerPcs || 1,
+          item.bahanTerbuang || item.wastePersen || 0,
+          subtotalBiaya
+        ]);
+      });
+    }
+
+    const sheetDetailProses = ss.getSheetByName('Detail_BOM_Proses');
+    if (payload.detailProses && payload.detailProses.length > 0) {
+      payload.detailProses.forEach(function(item) {
+        const idDetailProses = generateAutoId('Detail_BOM_Proses', 'BOMP');
+        const subtotalBiaya = parseCurrencyToNumber(item.subtotal);
+
+        sheetDetailProses.appendRow([
+          idDetailProses,
+          idProduk,
+          item.idMesin || "-",
+          item.namaProses,
+          item.durasi || item.durasiMenit || 0,
+          item.laborPerJam || item.tarifLaborJam || 0,
+          subtotalBiaya
+        ]);
+      });
+    }
+
+    return { status: "success", message: "Data produk berhasil disimpan dengan ID: " + idProduk };
+
+  } catch (e) {
+    return { status: "error", message: e.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// --- 4. AMBIL DATA MASTER PRODUK / KATALOG ---
+function getMasterProdukData() {
+  try {
+    const ss = getDb();
+    const sheet = ss.getSheetByName('Master_Produk');
+    if (!sheet) return [];
+
+    const values = sheet.getDataRange().getValues();
+    if (values.length <= 1) return [];
+
+    const result = [];
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      if (row[0] || row[1]) {
+        result.push({
+          id: row[0],
+          kodeProduk: row[1],
+          namaProduk: row[2],
+          marginPersen: row[3],
+          totalHpp: row[4],
+          hargaJual: row[5],
+          tanggal: row[6] || ''
+        });
+      }
+    }
+    return result;
+  } catch (e) {
+    throw new Error("Gagal mengambil data katalog: " + e.message);
+  }
+}
+
+// --- 5. HAPUS DATA DARI SHEET BASED ON ID ---
+function hapusDataFromSheet(sheetName, idKey, idValue) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const ss = getDb();
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return { status: "error", message: "Sheet tidak ditemukan" };
+
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return { status: "error", message: "Data kosong" };
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(idValue)) {
+        sheet.deleteRow(i + 1);
+        return { status: "success", message: "Data berhasil dihapus" };
+      }
+    }
+    return { status: "error", message: "ID tidak ditemukan" };
+  } catch (e) {
+    return { status: "error", message: e.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// --- 6. UPDATE MASTER BAHAN ---
+function updateBahanKeSheet(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const ss = getDb();
+    const sheet = ss.getSheetByName('Master_Bahan');
+    const data = sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(payload.idBahan)) {
+        const row = i + 1;
+        var hargaBeli = parseFloat(payload.hargaBeli) || 0;
+        var p = parseFloat(payload.p) || 0;
+        var l = parseFloat(payload.l) || 0;
+        var volume = parseFloat(payload.volume) || 0;
+        var berat = parseFloat(payload.berat) || 0;
+        var pcs = parseFloat(payload.pcs) || 0;
+
+        var hargaSatuanDasar = 0;
+        if (payload.tipe === 'Lembaran' && p > 0 && l > 0) {
+          hargaSatuanDasar = hargaBeli / (p * l);
+        } else if (payload.tipe === 'Panjang' && p > 0) {
+          hargaSatuanDasar = hargaBeli / p;
+        } else if (payload.tipe === 'Cairan' && volume > 0) {
+          hargaSatuanDasar = hargaBeli / volume;
+        } else if (payload.tipe === 'Satuan' && pcs > 0) {
+          hargaSatuanDasar = hargaBeli / pcs;
+        } else if (payload.tipe === 'Berat' && berat > 0) {
+          hargaSatuanDasar = hargaBeli / berat;
+        } else {
+          hargaSatuanDasar = hargaBeli;
+        }
+
+        sheet.getRange(row, 2, 1, 10).setValues([[
+          payload.nama, payload.tipe, payload.tipe, hargaBeli,
+          p, l, volume, berat, pcs, Number(hargaSatuanDasar)
+        ]]);
+
+        return { status: "success", message: "Bahan berhasil diperbarui" };
+      }
+    }
+    return { status: "error", message: "Data tidak ditemukan" };
+  } catch (e) {
+    return { status: "error", message: e.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// --- 7. UPDATE MASTER MESIN ---
+function updateMesinKeSheet(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const ss = getDb();
+    const sheet = ss.getSheetByName('Master_Mesin');
+    const data = sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(payload.idMesin)) {
+        const row = i + 1;
+        var biayaDepresiasiPerJam = payload.umurJam > 0 ? (payload.hargaBeli / payload.umurJam) : 0;
+        var biayaListrikPerJam = (payload.watt / 1000) * payload.tarifKwh;
+        var totalBiayaPerJam = biayaDepresiasiPerJam + biayaListrikPerJam;
+        var biayaPerMenit = totalBiayaPerJam / 60;
+
+        sheet.getRange(row, 2, 1, 6).setValues([[
+          payload.nama, payload.hargaBeli, payload.umurJam,
+          payload.watt, payload.tarifKwh, biayaPerMenit
+        ]]);
+
+        return { status: "success", message: "Mesin berhasil diperbarui" };
+      }
+    }
+    return { status: "error", message: "Data tidak ditemukan" };
+  } catch (e) {
+    return { status: "error", message: e.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ==========================================
+// MASTER MARKETPLACE
+// ==========================================
+
+function getMarketplacePrograms() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("Master_Marketplace");
+    
+    if (!sheet) return [];
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return [];
+
+    // Ambil 6 kolom (A sampai F)
+    const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues(); 
+    
+    const result = data.map((row, index) => {
+      const statusRaw = String(row[5] || "").toUpperCase().trim();
+      return {
+        rowId: index + 2,
+        idProgram: row[0],                                                           // Kolom A: ID
+        channel: String(row[1] || "").trim(),                                        // Kolom B: Channel
+        namaProgram: row[2],                                                         // Kolom C: Nama Program
+        persenBiaya: parseFloat(row[3]) || 0,                                         // Kolom D: Potongan Persen
+        fixedFee: parseFloat(row[4]) || 0,                                            // Kolom E: Fixed Fee
+        statusAktif: (row[5] === true || statusRaw === "AKTIF" || statusRaw === "TRUE") // Kolom F: Status
+      };
+    });
+
+    // URUTKAN BERDASARKAN CHANNEL (A-Z)
+    result.sort((a, b) => a.channel.localeCompare(b.channel, 'id', { sensitivity: 'base' }));
+
+    return result;
+  } catch (err) {
+    Logger.log("Error getMarketplacePrograms: " + err.message);
+    return [];
+  }
+}
+
+function simpanProgramMarketplace(data) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName("Master_Marketplace");
+    
+    if (!sheet) {
+      sheet = ss.insertSheet("Master_Marketplace");
+      sheet.appendRow(["ID", "Channel", "Nama_Program", "Potongan Persen (%)", "Fixed Fee (Rp)", "Status (Aktif / Non-Aktif)"]);
+    }
+    
+    const statusStr = data.statusAktif ? 'AKTIF' : 'NON-AKTIF';
+    
+    if (data.rowId) {
+      // UPDATE DATA EKSISTING (Mulai Kolom B / Index 2 sampai F / Status)
+      // Kolom A (ID) tetap utuh, tidak tertimpa
+      sheet.getRange(data.rowId, 2, 1, 5).setValues([[
+        data.channel, 
+        data.namaProgram, 
+        data.persenBiaya, 
+        data.fixedFee, 
+        statusStr
+      ]]);
+    } else {
+      // TAMBAH DATA BARU
+      const lastRow = sheet.getLastRow();
+      
+      // BIKIN ID RAPI BERURUTAN (Contoh: MP-101, MP-102, dst.)
+      // Jika lastRow = 1 (header), ID baru = MP-101. Jika lastRow = 4, ID baru = MP-104.
+      const nextNumber = 100 + lastRow; 
+      const newId = "MP-" + nextNumber;
+      
+      sheet.appendRow([
+        newId, 
+        data.channel, 
+        data.namaProgram, 
+        data.persenBiaya, 
+        data.fixedFee, 
+        statusStr
+      ]);
+    }
+    return { success: true };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+}
+
+function hapusProgramMarketplace(rowId) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("Master_Marketplace");
+    if (!sheet) return { success: false, message: "Sheet tidak ditemukan" };
+
+    // Hapus baris berdasarkan posisi fisik rowId di sheet
+    sheet.deleteRow(rowId);
+    return { success: true };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+}
+
+function toggleStatusMarketplace(rowId, isAktif) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("Master_Marketplace");
+    if (!sheet) return { success: false, message: "Sheet tidak ditemukan" };
+
+    const statusStr = isAktif ? 'AKTIF' : 'NON-AKTIF';
+    
+    // PERBAIKAN: Tembak Kolom 6 (Kolom F / Status), bukan Kolom 5!
+    sheet.getRange(rowId, 6).setValue(statusStr); 
+    
+    return { success: true };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+}

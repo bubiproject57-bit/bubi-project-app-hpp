@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bubi project - HPP Calculator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              yellow: '#F59E0B',
+              amber: '#D97706',
+              dark: '#0F172A',
+              card: '#1E293B',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+<style>
+    /* MAIN BACKGROUND IMAGE DENGAN OVERLAY DARK GLASS */
+    body {
+      background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.88)), 
+                        url('https://lh3.googleusercontent.com/d/1jkf6kgjLwWd8InGxTzPoTxX14pVKx5tR');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    /* KARTU TRANSPARAN GLASSMORPHISM */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .glass-card-dark {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* =========================================================
+       FORCE FIX WARNA TEKS TABEL (GLOBAL OVERRIDE)
+       ========================================================= */
+
+    /* 1. Jika Card Menggunakan Background Terang / Putih (.glass-card) */
+    .glass-card table th,
+    .glass-card table td,
+    .glass-card table td * {
+      color: #0f172a !important; /* Hitam pekat tegas */
+    }
+
+    /* 2. Jika Card Menggunakan Background Gelap (.glass-card-dark) */
+    .glass-card-dark table th,
+    .glass-card-dark table td,
+    .glass-card-dark table td * {
+      color: #ffffff !important; /* Putih terang */
+    }
+
+    /* 3. Pengatur Warna Khusus Kolom Biaya (%) Agar Kontras */
+    .glass-card table td:nth-child(4) {
+      color: #b45309 !important; /* Cokelat/Orange pekat di background putih */
+      font-weight: 700 !important;
+    }
+    
+    .glass-card-dark table td:nth-child(4) {
+      color: #facc15 !important; /* Kuning terang di background gelap */
+      font-weight: 700 !important;
+    }
+</style>
+</head>
+<body class="text-slate-800 font-sans antialiased min-h-screen">
+
+  <!-- OVERLAY LOADING DI TENGAH LAYAR -->
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[100] flex flex-col items-center justify-center hidden transition-all duration-300">
+    <div class="glass-card p-6 rounded-3xl shadow-2xl flex flex-col items-center space-y-4 max-w-xs w-full mx-4">
+      <div id="loader-spinner" class="w-12 h-12 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+      <div id="loader-icon-success" class="hidden text-4xl text-emerald-500">
+        <i class="fas fa-circle-check animate-bounce"></i>
+      </div>
+      <div class="text-center">
+        <h3 id="loader-title" class="font-extrabold text-sm text-slate-800">Memproses Data...</h3>
+        <p id="loader-desc" class="text-xs text-slate-600 mt-1 font-medium">Mohon tunggu sebentar</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAINER UTAMA DENGAN SIDEBAR KIRI -->
+  <div class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- SIDEBAR NAVIGATION KIRI (DESKTOP FULL HEIGHT) -->
+    <aside class="w-full md:w-64 glass-card-dark text-white p-5 flex md:flex-col justify-between items-center md:items-start shrink-0 border-b md:border-b-0 md:border-r border-slate-700/50 sticky top-0 z-40">
+      
+      <div class="flex items-center space-x-3 w-full border-b border-slate-700/60 pb-4">
+        <!-- LOGO BULAT UTUH PRESISI -->
+        <img src="https://lh3.googleusercontent.com/d/11EvkqcfFqvqOt0FLc-4UsGh-UFnSCeeP" alt="Bubi project Logo" class="w-11 h-11 object-cover rounded-full shadow-lg border border-amber-500/30" onerror="this.onerror=null; this.src='https://placehold.co/100x100/f59e0b/ffffff?text=BP'">
+        <div>
+          <h1 class="font-extrabold text-base tracking-tight flex items-center text-white">
+            Bubi project <span class="ml-1.5 text-[9px] bg-amber-500/20 text-amber-400 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">PRO</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 font-medium">HPP & Pricing Engine</p>
+        </div>
+      </div>
+
+      <!-- NAVMENU DESKTOP SIDEBAR -->
+      <nav class="hidden md:flex flex-col space-y-2 w-full my-6">
+        <button onclick="switchTab('tab-kalkulator')" id="side-nav-kalkulator" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-bold text-xs text-amber-400 bg-amber-500/20 border border-amber-500/30 shadow transition">
+          <i class="fas fa-calculator text-base"></i>
+          <span>Kalkulator HPP</span>
+        </button>
+        <button onclick="switchTab('tab-bahan')" id="side-nav-bahan" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-xs text-slate-300 hover:bg-slate-800/60 transition">
+          <i class="fas fa-boxes-stacked text-base"></i>
+          <span>Master Bahan</span>
+        </button>
+        <button onclick="switchTab('tab-mesin')" id="side-nav-mesin" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-xs text-slate-300 hover:bg-slate-800/60 transition">
+          <i class="fas fa-microchip text-base"></i>
+          <span>Master Mesin</span>
+        </button>
+        <button onclick="switchTab('tab-katalog')" id="side-nav-katalog" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-xs text-slate-300 hover:bg-slate-800/60 transition">
+          <i class="fas fa-boxes text-base"></i>
+          <span>Katalog & Order</span>
+        </button>
+        <button onclick="switchTab('tab-marketplace')" id="side-nav-marketplace" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-xs text-slate-300 hover:bg-slate-800/60 transition">
+          <i class="fas fa-sliders text-base"></i>
+          <span>Pengaturan Marketplace</span>
+        </button>
+      </nav>
+
+      <!-- BOTOM REFRESH BUTTON (DESKTOP) -->
+      <div class="w-full pt-4 border-t border-slate-700/60 hidden md:block">
+        <button onclick="refreshData()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center space-x-2 transition border border-slate-700">
+          <i class="fas fa-arrows-rotate text-xs" id="icon-refresh"></i>
+          <span>Sinkron Database</span>
+        </button>
+      </div>
+
+      <!-- REFRESH MOBILE ONLY -->
+      <button onclick="refreshData()" class="md:hidden w-9 h-9 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl flex items-center justify-center border border-slate-700">
+        <i class="fas fa-arrows-rotate text-sm" id="icon-refresh-mobile"></i>
+      </button>
+
+    </aside>
+
+    <!-- AREA KERJA UTAMA (FULL WIDTH LAYOUT) -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 w-full">
+
+      <!-- TAB 1: KALKULATOR HPP (BOM) -->
+      <div id="tab-kalkulator" class="tab-content space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+          
+          <!-- KOLOM KIRI: INPUT FORM BOM (SPAN 8) -->
+          <div class="lg:col-span-8 space-y-5">
+            
+            <!-- IDENTITAS PRODUK -->
+            <div class="glass-card p-6 rounded-2xl shadow-lg border border-white/60">
+              <h2 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-4 flex items-center">
+                <i class="fas fa-box-open mr-2 text-amber-600"></i>Identitas Produk Target
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Nama Produk / Pesanan Custom</label>
+                  <input type="text" id="nama-produk" placeholder="Misal: Plakat Akrilik Wisuda 20x15" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Target Margin (%)</label>
+                  <div class="relative">
+                    <input type="number" id="margin-target" value="50" oninput="hitungTotalHPP()" class="w-full p-3 bg-amber-50 border border-amber-300 rounded-xl text-sm font-extrabold text-amber-700 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <span class="absolute right-3 top-3 text-xs font-bold text-amber-600">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DETAIL BAHAN BAKU -->
+            <div class="glass-card p-6 rounded-2xl shadow-lg border border-white/60">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center">
+                  <i class="fas fa-layer-group mr-2 text-amber-600"></i>Komponen Bahan Baku
+                </h2>
+                <button type="button" onclick="tambahBarisBahan()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl transition shadow-md flex items-center">
+                  <i class="fas fa-plus mr-1.5"></i>Tambah Bahan
+                </button>
+              </div>
+              <div id="container-bahan" class="space-y-3">
+                <!-- Item Bahan via JS -->
+              </div>
+            </div>
+
+            <!-- DETAIL MESIN & PROSES -->
+            <div class="glass-card p-6 rounded-2xl shadow-lg border border-white/60">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center">
+                  <i class="fas fa-gears mr-2 text-amber-600"></i>Proses & Operator
+                </h2>
+                <button type="button" onclick="tambahBarisProses()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl transition shadow-md flex items-center">
+                  <i class="fas fa-plus mr-1.5"></i>Tambah Proses
+                </button>
+              </div>
+              <div id="container-proses" class="space-y-3">
+                <!-- Item Proses via JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- KOLOM KANAN: PANEL RINGKASAN KALKULASI & SIMPAN PRODUK (SPAN 4) -->
+          <div class="lg:col-span-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-xl text-white space-y-5 sticky top-6">
+              <h3 class="text-xs font-black tracking-wider uppercase text-amber-400 border-b border-slate-700/80 pb-3 flex items-center">
+                <i class="fas fa-calculator mr-2"></i>Ringkasan Kalkulasi HPP
+              </h3>
+
+              <!-- Breakdown 3 Komponen Biaya -->
+              <div class="space-y-3 text-xs">
+                <div class="flex justify-between items-center text-slate-300">
+                  <span>Total Biaya Bahan</span>
+                  <span id="summary-biaya-bahan" class="font-mono font-bold text-white">Rp 0</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span>Total Biaya Mesin</span>
+                  <span id="summary-biaya-mesin" class="font-mono font-bold text-white">Rp 0</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span>Total Biaya Tenaga Kerja</span>
+                  <span id="summary-biaya-upah" class="font-mono font-bold text-white">Rp 0</span>
+                </div>
+              </div>
+
+              <hr class="border-slate-800">
+
+              <!-- Total HPP (Modal) -->
+              <div class="flex justify-between items-baseline">
+                <span class="text-xs font-extrabold uppercase text-slate-400">Total HPP (Modal)</span>
+                <span id="text-total-hpp" class="text-lg font-black font-mono text-white">Rp 0</span>
+              </div>
+
+              <!-- Box Rekomendasi Harga Jual Offline -->
+              <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80 space-y-1">
+                <div class="flex justify-between text-[10px] font-extrabold uppercase text-amber-400">
+                  <span>Harga Jual Standar (Offline)</span>
+                  <span>Margin <span id="text-margin-percent" class="font-bold text-white">50</span>%</span>
+                </div>
+                <div id="text-harga-jual" class="text-xl font-black font-mono text-amber-400 tracking-tight">
+                  Rp 0
+                </div>
+              </div>
+
+              <!-- SIMULASI MARKETPLACE (MULTI-CHANNEL) -->
+              <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                <div class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider flex items-center justify-between border-b border-slate-800 pb-1.5">
+                  <span><i class="fas fa-store text-amber-500 mr-1.5"></i>Rekomendasi Marketplace</span>
+                  <span class="text-[9px] text-slate-500 font-normal">Nett Profit Safe</span>
+                </div>
+                
+                <div id="container-rekomendasi-mp" class="space-y-1.5 text-xs">
+                  <div class="flex justify-between items-center py-1 border-b border-slate-800/50">
+                    <span class="text-slate-300 font-semibold flex items-center text-[11px]">
+                      <i class="fas fa-bag-shopping text-orange-500 mr-1.5"></i>Shopee
+                    </span>
+                    <span id="harga-mp-shopee" class="font-mono font-bold text-amber-300 text-[11px]">Rp 0</span>
+                  </div>
+                  <div class="flex justify-between items-center py-1 border-b border-slate-800/50">
+                    <span class="text-slate-300 font-semibold flex items-center text-[11px]">
+                      <i class="fab fa-tiktok text-slate-100 mr-1.5"></i>TikTok Shop
+                    </span>
+                    <span id="harga-mp-tiktok" class="font-mono font-bold text-amber-300 text-[11px]">Rp 0</span>
+                  </div>
+                  <div class="flex justify-between items-center py-1">
+                    <span class="text-slate-300 font-semibold flex items-center text-[11px]">
+                      <i class="fas fa-shop text-emerald-500 mr-1.5"></i>Tokopedia
+                    </span>
+                    <span id="harga-mp-tokopedia" class="font-mono font-bold text-amber-300 text-[11px]">Rp 0</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tombol Simpan Produk -->
+              <button type="button" onclick="simpanKalkulasiProduk()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 rounded-xl shadow-lg transition text-xs uppercase tracking-wider flex items-center justify-center active:scale-95">
+                <i class="fas fa-floppy-disk mr-2"></i>SIMPAN PRODUK
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 2: MASTER BAHAN BAKU -->
+      <div id="tab-bahan" class="tab-content hidden w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+          
+          <!-- KIRI: FORM INPUT MASTER BAHAN (SPAN 5) -->
+          <div class="lg:col-span-5">
+            <div class="glass-card p-6 rounded-3xl shadow-xl space-y-5 bg-white/95 border border-white/60 sticky top-4">
+              <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-200/80 pb-3 flex items-center justify-between">
+                <span class="flex items-center"><i class="fas fa-folder-plus mr-2 text-amber-600"></i>Tambah Master Bahan</span>
+                <span id="label-mode-bahan" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md hidden">Mode Edit</span>
+              </h2>
+              
+              <form id="form-master-bahan" autocomplete="off" onsubmit="submitMasterBahan(event)" class="space-y-4">
+                <input type="hidden" id="m-id-bahan" value="">
+
+                <div>
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Nama Bahan Baku</label>
+                  <input type="text" id="m-nama-bahan" required autocomplete="off" placeholder="Contoh: Triplek Meranti 9mm / Acrylic 3mm" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Tipe Pengukuran</label>
+                    <select id="m-tipe-bahan" onchange="toggleFormMasterBahan()" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                      <option value="Lembaran">Lembaran (cm x cm)</option>
+                      <option value="Cairan">Cairan (ml / L)</option>
+                      <option value="Satuan">Satuan Unit (Pcs)</option>
+                      <option value="Panjang">Panjang (cm / M)</option>
+                      <option value="Berat">Berat (Gram / Kg)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Harga Beli Total (Rp)</label>
+                    <input type="text" id="m-harga-beli" required autocomplete="off" placeholder="150.000" oninput="formatCurrencyInput(this)" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-mono font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                  </div>
+                </div>
+
+                <!-- INPUT FIELDS DINAMIS -->
+                <div id="field-dimensi" class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Panjang Utuh (cm)</label>
+                    <input type="number" id="m-panjang" autocomplete="off" placeholder="120" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm">
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Lebar Utuh (cm)</label>
+                    <input type="number" id="m-lebar" autocomplete="off" placeholder="240" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm">
+                  </div>
+                </div>
+                <div id="field-volume" class="hidden">
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Total Volume Beli (ml)</label>
+                  <input type="number" id="m-volume" autocomplete="off" placeholder="1000" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm">
+                </div>
+                <div id="field-pcs" class="hidden">
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Total Isi per Pack (Pcs)</label>
+                  <input type="number" id="m-pcs" autocomplete="off" placeholder="100" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm">
+                </div>
+                <div id="field-berat" class="hidden">
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Total Berat Beli (Gram)</label>
+                  <input type="number" id="m-berat" autocomplete="off" placeholder="1000" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm">
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                  <button type="submit" id="btn-simpan-bahan" class="flex-1 bg-slate-900 hover:bg-slate-800 text-amber-400 font-extrabold py-3 rounded-xl shadow-lg transition text-xs flex items-center justify-center">
+                    <i class="fas fa-plus-circle mr-2"></i>SIMPAN MASTER BAHAN
+                  </button>
+                  <button type="button" onclick="resetFormMasterBahan()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-3 rounded-xl text-xs transition">
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- KANAN: TABEL DAFTAR MASTER BAHAN (SPAN 7) -->
+          <div class="lg:col-span-7">
+            <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 space-y-4">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-3">
+                <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider flex items-center">
+                  <i class="fas fa-boxes-stacked mr-2 text-amber-600"></i>Daftar Master Bahan Baku
+                </h2>
+                <div class="relative w-full sm:w-48">
+                  <input type="text" id="search-master-bahan" onkeyup="filterTabelBahan()" placeholder="Cari bahan..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  <i class="fas fa-search absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50">
+                      <th class="p-2.5">Nama Bahan</th>
+                      <th class="p-2.5">Tipe / Dimensi</th>
+                      <th class="p-2.5 text-right">Harga Beli</th>
+                      <th class="p-2.5 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-master-bahan" class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                    <tr>
+                      <td colspan="4" class="p-4 text-center text-slate-400 italic">Belum ada data master bahan.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 3: MASTER MESIN -->
+      <div id="tab-mesin" class="tab-content hidden w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+          
+          <!-- KIRI: FORM INPUT MASTER MESIN (SPAN 5) -->
+          <div class="lg:col-span-5">
+            <div class="glass-card p-6 rounded-3xl shadow-xl space-y-5 bg-white/95 border border-white/60 sticky top-4">
+              <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-200/80 pb-3 flex items-center justify-between">
+                <span class="flex items-center"><i class="fas fa-screwdriver-wrench mr-2 text-amber-600"></i>Tambah Master Mesin</span>
+                <span id="label-mode-mesin" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md hidden">Mode Edit</span>
+              </h2>
+              
+              <form id="form-master-mesin" autocomplete="off" onsubmit="submitMasterMesin(event)" class="space-y-4">
+                <input type="hidden" id="m-id-mesin" value="">
+
+                <div>
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Nama Mesin / Peralatan Produksi</label>
+                  <input type="text" id="m-nama-mesin" required autocomplete="off" placeholder="Contoh: Laser Sculpfun S9 / Mesin Print" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Harga Beli / Perolehan (Rp)</label>
+                    <input type="text" id="m-harga-mesin" required autocomplete="off" placeholder="5.000.000" oninput="formatCurrencyInput(this)" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-mono font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Umur Pakai (Jam)</label>
+                    <input type="number" id="m-umur-mesin" required autocomplete="off" placeholder="2000" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Konsumsi Listrik (Watt)</label>
+                    <input type="number" id="m-watt" autocomplete="off" placeholder="60" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm">
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Tarif PLN / kWh (Rp)</label>
+                    <input type="text" id="m-tarif-kwh" value="1.444" autocomplete="off" oninput="formatCurrencyInput(this)" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-mono font-bold">
+                  </div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                  <button type="submit" id="btn-simpan-mesin" class="flex-1 bg-slate-900 hover:bg-slate-800 text-amber-400 font-extrabold py-3 rounded-xl shadow-lg transition text-xs flex items-center justify-center">
+                    <i class="fas fa-plus-circle mr-2"></i>SIMPAN MASTER MESIN
+                  </button>
+                  <button type="button" onclick="resetFormMasterMesin()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-3 rounded-xl text-xs transition">
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- KANAN: TABEL DAFTAR MASTER MESIN (SPAN 7) -->
+          <div class="lg:col-span-7">
+            <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 space-y-4">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-3">
+                <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider flex items-center">
+                  <i class="fas fa-list-check mr-2 text-amber-600"></i>Daftar Master Mesin & Alat
+                </h2>
+                <div class="relative w-full sm:w-48">
+                  <input type="text" id="search-master-mesin" onkeyup="filterTabelMesin()" placeholder="Cari mesin..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  <i class="fas fa-search absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50">
+                      <th class="p-2.5">Nama Mesin</th>
+                      <th class="p-2.5">Spesifikasi</th>
+                      <th class="p-2.5 text-right">Tarif / Jam</th>
+                      <th class="p-2.5 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-master-mesin" class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                    <tr>
+                      <td colspan="4" class="p-4 text-center text-slate-400 italic">Belum ada data master mesin.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 4: PENGATURAN MARKETPLACE -->
+      <div id="tab-marketplace" class="tab-content hidden w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+          
+          <!-- KIRI: FORM TAMBAH / EDIT PROGRAM (SPAN 5) -->
+          <div class="lg:col-span-5">
+            <div class="glass-card p-6 rounded-3xl shadow-xl space-y-5 bg-white/95 border border-white/60 sticky top-4">
+              <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-200/80 pb-3 flex items-center justify-between">
+                <span class="flex items-center"><i class="fas fa-sliders mr-2 text-amber-600"></i>Tambah Program Marketplace</span>
+              </h2>
+              
+              <form id="form-master-mp" autocomplete="off" onsubmit="event.preventDefault(); simpanProgramMarketplace();" class="space-y-4">
+                <input type="hidden" id="mp-row-id" value="">
+
+                <div>
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Channel / Marketplace</label>
+                  
+                  <!-- Ditambahkan event onchange di bawah ini -->
+                  <select id="mp-channel" onchange="toggleCustomChannelInput()" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <option value="Shopee">Shopee</option>
+                    <option value="TikTok Shop">TikTok Shop</option>
+                    <option value="Tokopedia">Tokopedia</option>
+                    <option value="Lazada">Lazada</option>
+                    <option value="Lainnya">Lainnya / Tambah Baru...</option>
+                  </select>
+
+                  <!-- Input Teks Custom -->
+                  <input type="text" id="mp-channel-custom" placeholder="Ketik nama channel (misal: Facebook, IG)" class="hidden w-full mt-2 p-3 bg-amber-50/50 border border-amber-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div>
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Nama Program / Biaya</label>
+                  <input type="text" id="mp-nama-program" required autocomplete="off" placeholder="Contoh: Admin Star Seller / Gratis Ongkir Xtra" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Potongan Persen (%)</label>
+                    <input type="number" id="mp-persen" step="0.1" placeholder="4.0" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-mono font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Fixed Fee / Order (Rp)</label>
+                    <input type="number" id="mp-fixed" placeholder="1000" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-mono font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                  </div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                  <button type="submit" class="flex-1 bg-slate-900 hover:bg-slate-800 text-amber-400 font-extrabold py-3 rounded-xl shadow-lg transition text-xs flex items-center justify-center cursor-pointer">
+                    <i class="fas fa-plus-circle mr-2"></i>SIMPAN PROGRAM
+                  </button>
+                  <button type="button" onclick="resetFormMarketplace()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-3 rounded-xl text-xs transition cursor-pointer">
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- KANAN: TABEL DAFTAR PROGRAM MARKETPLACE (SPAN 7) -->
+          <div class="lg:col-span-7">
+            <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 space-y-4">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-3">
+                <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider flex items-center">
+                  <i class="fas fa-list-check mr-2 text-amber-600"></i>Daftar Program & Fee Aktif
+                </h2>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-50">
+                      <th class="p-2.5 text-center">Aktif</th>
+                      <th class="p-2.5">Channel</th>
+                      <th class="p-2.5">Nama Program</th>
+                      <th class="p-2.5 text-right">Biaya (%)</th>
+                      <th class="p-2.5 text-right">Fixed Fee</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-master-mp" class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                    <tr>
+                      <td colspan="5" class="p-4 text-center text-slate-400 italic">Memuat data program marketplace...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 5: KATALOG PRODUK & ORDER TRACKING -->
+      <div id="tab-katalog" class="tab-content hidden w-full">
+        <?!= include('KatalogOrder'); ?>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- BOTTOM NAVBAR UNTUK MOBILE MENU -->
+  <nav class="md:hidden fixed bottom-3 left-4 right-4 glass-card-dark border border-slate-700/80 rounded-2xl px-6 py-2.5 flex justify-around items-center shadow-2xl z-50">
+    <button onclick="switchTab('tab-kalkulator')" id="nav-kalkulator" class="flex flex-col items-center text-amber-400 font-bold text-[11px]">
+      <i class="fas fa-calculator text-base mb-0.5"></i>
+      <span>Kalkulator</span>
+    </button>
+    <button onclick="switchTab('tab-bahan')" id="nav-bahan" class="flex flex-col items-center text-slate-400 font-medium text-[11px]">
+      <i class="fas fa-boxes-stacked text-base mb-0.5"></i>
+      <span>Bahan</span>
+    </button>
+    <button onclick="switchTab('tab-mesin')" id="nav-mesin" class="flex flex-col items-center text-slate-400 font-medium text-[11px]">
+      <i class="fas fa-microchip text-base mb-0.5"></i>
+      <span>Mesin</span>
+    </button>
+    <button onclick="switchTab('tab-marketplace')" id="nav-marketplace" class="flex flex-col items-center text-slate-400 font-medium text-[11px]">
+      <i class="fas fa-sliders text-base mb-0.5"></i>
+      <span>Marketplace</span>
+    </button>
+  </nav>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let editRowId = null;
+    if (typeof window.masterMarketplace === 'undefined') {
+      window.masterMarketplace = [];
+    }
+
+    let globalData = {
+      bahan: [],
+      mesin: [],
+      produk: []
+    };
+
+    let DB_MASTER_BAHAN = [];
+    let DB_MASTER_MESIN = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      tambahBarisBahan();
+      tambahBarisProses();
+      loadMasterData();
+      loadDataMarketplace();
+      switchTab('tab-kalkulator');
+    });
+
+    function formatCurrencyInput(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value !== '') {
+        input.value = parseInt(value, 10).toLocaleString('id-ID');
+      } else {
+        input.value = '';
+      }
+    }
+
+    function getRawNumber(formattedValue) {
+      if (!formattedValue) return 0;
+      return parseFloat(formattedValue.toString().replace(/\./g, '').replace(/,/g, '.')) || 0;
+    }
+
+    function cleanNumber(val) {
+      if (!val) return 0;
+      return Number(val.toString().replace(/[^0-9]/g, ''));
+    }
+
+    function showLoading(title, desc) {
+      document.getElementById('loader-spinner').classList.remove('hidden');
+      document.getElementById('loader-icon-success').classList.add('hidden');
+      document.getElementById('loader-title').innerText = title || "Memproses Data...";
+      document.getElementById('loader-desc').innerText = desc || "Mohon tunggu sebentar";
+      document.getElementById('loading-overlay').classList.remove('hidden');
+    }
+
+    function showSuccess(title, desc, callback) {
+      document.getElementById('loader-spinner').classList.add('hidden');
+      document.getElementById('loader-icon-success').classList.remove('hidden');
+      document.getElementById('loader-title').innerText = title || "Berhasil!";
+      document.getElementById('loader-desc').innerText = desc || "Data telah tersimpan";
+
+      setTimeout(function() {
+        document.getElementById('loading-overlay').classList.add('hidden');
+        if (callback) callback();
+      }, 1200);
+    }
+
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.add('hidden');
+    }
+
+    function switchTab(tabId) {
+      try {
+        const allTabs = document.querySelectorAll('.tab-content');
+        allTabs.forEach(tab => {
+          tab.classList.add('hidden');
+          tab.removeAttribute('style');
+        });
+
+        const targetTab = document.getElementById(tabId);
+        if (!targetTab) return;
+
+        targetTab.classList.remove('hidden');
+
+        const navButtons = document.querySelectorAll('aside button, nav button');
+        navButtons.forEach(btn => {
+          btn.classList.remove('bg-amber-500/20', 'text-amber-400', 'border-l-4', 'border-amber-500');
+          const onclickAttr = btn.getAttribute('onclick') || '';
+          if (onclickAttr.includes(`'${tabId}'`)) {
+            btn.classList.add('bg-amber-500/20', 'text-amber-400', 'border-l-4', 'border-amber-500');
+          }
+        });
+
+        if (tabId === 'tab-marketplace' && typeof loadDataMarketplace === 'function') {
+          loadDataMarketplace();
+        } else if (tabId === 'tab-kalkulator') {
+          hitungTotalHPP();
+        }
+      } catch (err) {
+        console.error("Switch tab error:", err);
+      }
+    }
+
+    function loadMasterData() {
+      showLoading("Memuat Data...", "Mengambil master bahan & mesin dari database");
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(onInitialDataLoaded)
+          .withFailureHandler(onFailure)
+          .getInitialData();
+      } else {
+        hideLoading();
+      }
+    }
+
+    function refreshData() {
+      loadMasterData();
+      loadDataMarketplace();
+    }
+
+    function onInitialDataLoaded(data) {
+      hideLoading();
+      if (!data) return;
+      
+      globalData = data;
+      DB_MASTER_BAHAN = data.bahan || [];
+      DB_MASTER_MESIN = data.mesin || [];
+
+      renderTabelBahan(DB_MASTER_BAHAN);
+      renderTabelMesin(DB_MASTER_MESIN);
+      updateDropdowns();
+      hitungTotalHPP();
+    }
+
+    function updateDropdowns() {
+      document.querySelectorAll('[id^="select-bahan-"]').forEach(selectEl => {
+        let currentValue = selectEl.value;
+        let optionsHtml = '<option value="">-- Pilih Bahan Baku --</option>';
+        optionsHtml += DB_MASTER_BAHAN.map(b => {
+          const id = b.ID_Bahan || b.id;
+          const nama = b.Nama_Bahan || b.nama;
+          const tipe = b.Tipe_Bahan || b.tipe || '';
+          return `<option value="${id}">${nama} (${tipe})</option>`;
+        }).join('');
+        selectEl.innerHTML = optionsHtml;
+        selectEl.value = currentValue;
+      });
+
+      document.querySelectorAll('[id^="select-mesin-"]').forEach(selectEl => {
+        let currentValue = selectEl.value;
+        let optionsHtml = '<option value="">-- Pilih Mesin --</option>';
+        optionsHtml += DB_MASTER_MESIN.map(m => {
+          const id = m.ID_Mesin || m.id;
+          const nama = m.Nama_Mesin || m.nama;
+          return `<option value="${id}">${nama}</option>`;
+        }).join('');
+        selectEl.innerHTML = optionsHtml;
+        selectEl.value = currentValue;
+      });
+    }
+
+    function toggleFormMasterBahan() {
+      const tipe = document.getElementById('m-tipe-bahan').value;
+      document.getElementById('field-dimensi').classList.add('hidden');
+      document.getElementById('field-volume').classList.add('hidden');
+      document.getElementById('field-pcs').classList.add('hidden');
+      document.getElementById('field-berat').classList.add('hidden');
+
+      if (tipe === 'Lembaran' || tipe === 'Panjang') document.getElementById('field-dimensi').classList.remove('hidden');
+      if (tipe === 'Cairan') document.getElementById('field-volume').classList.remove('hidden');
+      if (tipe === 'Satuan') document.getElementById('field-pcs').classList.remove('hidden');
+      if (tipe === 'Berat') document.getElementById('field-berat').classList.remove('hidden');
+    }
+
+    function tambahBarisBahan() {
+      const container = document.getElementById('container-bahan');
+      const index = Date.now();
+      
+      let options = DB_MASTER_BAHAN.map(b => {
+        const id = b.ID_Bahan || b.id;
+        const nama = b.Nama_Bahan || b.nama;
+        const tipe = b.Tipe_Bahan || b.tipe || '';
+        return `<option value="${id}">${nama} (${tipe})</option>`;
+      }).join('');
+
+      const html = `
+        <div id="row-bahan-${index}" class="p-3 bg-white/80 border border-slate-300 rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <select onchange="updateTipeBahan('${index}'); hitungTotalHPP();" id="select-bahan-${index}" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none">
+              <option value="">-- Pilih Bahan Baku --</option>
+              ${options}
+            </select>
+            <button type="button" onclick="hapusBaris('row-bahan-${index}')" class="ml-2 text-rose-500 hover:text-rose-700 text-xs p-1">
+              <i class="fas fa-trash-can"></i>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div id="wrapper-p-${index}">
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase">Panjang (cm)</span>
+              <input type="number" id="p-pakai-${index}" oninput="hitungTotalHPP()" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+
+            <div id="wrapper-l-${index}">
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase">Lebar (cm)</span>
+              <input type="number" id="l-pakai-${index}" oninput="hitungTotalHPP()" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+
+            <div id="wrapper-pemakaian-${index}" class="hidden col-span-2">
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase">Pemakaian (ml/gr/pcs)</span>
+              <input type="number" id="pemakaian-${index}" oninput="hitungTotalHPP()" placeholder="1" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+
+            <div>
+              <span class="text-[9px] text-amber-600 font-extrabold uppercase">Qty (Layer)</span>
+              <input type="number" id="qty-${index}" value="1" min="1" oninput="hitungTotalHPP()" onblur="if(this.value < 1 || !this.value) this.value = 1; hitungTotalHPP();" class="w-full p-2 bg-amber-50 border border-amber-400 rounded-lg text-xs font-mono font-bold text-amber-800 focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+
+            <div>
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase">Bahan Terbuang</span>
+              <select id="waste-${index}" onchange="hitungTotalHPP()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none">
+                <option value="0">0% (Tanpa Sisa)</option>
+                <option value="3">3% (Sangat Sedikit)</option>
+                <option value="5" selected>5% (Standar Laser)</option>
+                <option value="10">10% (Potong Manual)</option>
+                <option value="15">15% (Sisa Potong)</option>
+                <option value="20">20% (Bentuk Rumit)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="text-right text-[11px] font-extrabold text-amber-700">
+            Subtotal: <span id="subtotal-bahan-${index}">Rp 0</span>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function updateTipeBahan(index) {
+      const idBahan = document.getElementById(`select-bahan-${index}`)?.value;
+      if (!DB_MASTER_BAHAN) return;
+      
+      const bahan = DB_MASTER_BAHAN.find(b => (b.ID_Bahan || b.id) === idBahan);
+
+      const wrapP = document.getElementById(`wrapper-p-${index}`);
+      const wrapL = document.getElementById(`wrapper-l-${index}`);
+      const wrapPemakaian = document.getElementById(`wrapper-pemakaian-${index}`);
+
+      const tipe = bahan ? (bahan.Tipe_Bahan || bahan.tipe) : '';
+
+      if (bahan && tipe !== 'Lembaran') {
+        wrapP?.classList.add('hidden');
+        wrapL?.classList.add('hidden');
+        wrapPemakaian?.classList.remove('hidden');
+      } else {
+        wrapP?.classList.remove('hidden');
+        wrapL?.classList.remove('hidden');
+        wrapPemakaian?.classList.add('hidden');
+      }
+    }
+
+    function tambahBarisProses() {
+      const container = document.getElementById('container-proses');
+      const index = Date.now();
+      
+      let options = DB_MASTER_MESIN.map(m => {
+        const id = m.ID_Mesin || m.id;
+        const nama = m.Nama_Mesin || m.nama;
+        return `<option value="${id}">${nama}</option>`;
+      }).join('');
+
+      const html = `
+        <div id="row-proses-${index}" class="p-3 bg-white/80 border border-slate-300 rounded-xl space-y-3">
+          <div class="flex justify-between items-center">
+            <select id="kategori-proses-${index}" onchange="toggleKategoriProses('${index}'); hitungTotalHPP();" class="w-full p-2 bg-amber-50 border border-amber-300 rounded-lg text-xs font-bold text-amber-800 focus:ring-2 focus:ring-amber-500 outline-none">
+              <option value="mesin">Proses Mesin</option>
+              <option value="tenaga">Tenaga Kerja / Manual</option>
+            </select>
+            <button onclick="hapusBaris('row-proses-${index}')" class="ml-2 text-rose-500 hover:text-rose-700 text-xs p-1">
+              <i class="fas fa-trash-can"></i>
+            </button>
+          </div>
+
+          <div id="wrapper-mesin-${index}" class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase">Pilih Mesin</span>
+              <select id="select-mesin-${index}" onchange="hitungTotalHPP()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none">
+                <option value="">-- Pilih Mesin --</option>
+                ${options}
+              </select>
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase">Durasi (Mnt)</span>
+              <input type="number" id="durasi-${index}" oninput="hitungTotalHPP()" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+          </div>
+
+          <div id="wrapper-tenaga-${index}" class="hidden">
+            <span class="text-[9px] text-slate-500 font-extrabold uppercase">Upah / Jasa (Rp)</span>
+            <input type="text" id="labor-${index}" oninput="formatCurrencyInput(this); hitungTotalHPP();" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500 outline-none">
+          </div>
+
+          <div class="text-right text-[11px] font-extrabold text-amber-700">
+            Subtotal: <span id="subtotal-proses-${index}">Rp 0</span>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function toggleKategoriProses(index) {
+      const kategori = document.getElementById(`kategori-proses-${index}`)?.value;
+      const wrapMesin = document.getElementById(`wrapper-mesin-${index}`);
+      const wrapTenaga = document.getElementById(`wrapper-tenaga-${index}`);
+
+      if (kategori === 'tenaga') {
+        wrapMesin?.classList.add('hidden');
+        wrapTenaga?.classList.remove('hidden');
+      } else {
+        wrapMesin?.classList.remove('hidden');
+        wrapTenaga?.classList.add('hidden');
+      }
+    }
+
+    function hapusBaris(id) {
+      const element = document.getElementById(id);
+      if (element) element.remove();
+      hitungTotalHPP();
+    }
+
+    function hitungTotalHPP() {
+      let totalBahan = 0;
+      let totalBiayaMesin = 0;
+      let totalBiayaUpah = 0;
+
+      document.querySelectorAll('#container-bahan > div').forEach(row => {
+        const id = row.id.replace('row-bahan-', '');
+        const idBahan = document.getElementById(`select-bahan-${id}`)?.value;
+        const bahan = DB_MASTER_BAHAN.find(b => (b.ID_Bahan || b.id) === idBahan);
+        
+        if (bahan) {
+          const hargaBeli = Number(bahan.Harga_Beli || bahan.hargaBeli || 0);
+          const pUtuh = Number(bahan.Dimensi_Panjang_cm || bahan.Panjang_cm || bahan.p || 1);
+          const lUtuh = Number(bahan.Dimensi_Lebar_cm || bahan.Lebar_cm || bahan.l || 1);
+          const volume = Number(bahan.Volume_ml || 1);
+          const pcs = Number(bahan.Isi_Pcs || 1);
+          const berat = Number(bahan.Berat_gram || 1);
+          const tipe = bahan.Tipe_Bahan || bahan.tipe;
+
+          let hargaSatuanDasar = 0;
+          if (tipe === 'Lembaran') hargaSatuanDasar = hargaBeli / (pUtuh * lUtuh);
+          else if (tipe === 'Panjang') hargaSatuanDasar = hargaBeli / pUtuh;
+          else if (tipe === 'Cairan') hargaSatuanDasar = hargaBeli / volume;
+          else if (tipe === 'Satuan') hargaSatuanDasar = hargaBeli / pcs;
+          else if (tipe === 'Berat') hargaSatuanDasar = hargaBeli / berat;
+
+          const pPakai = parseFloat(document.getElementById(`p-pakai-${id}`)?.value) || 0;
+          const lPakai = parseFloat(document.getElementById(`l-pakai-${id}`)?.value) || 0;
+          
+          let qtyInput = parseFloat(document.getElementById(`qty-${id}`)?.value);
+          if (isNaN(qtyInput) || qtyInput <= 0) qtyInput = 1;
+
+          const waste = parseFloat(document.getElementById(`waste-${id}`)?.value) || 0;
+
+          let pemakaianUnit = (tipe === 'Lembaran') 
+            ? (pPakai * lPakai) * qtyInput 
+            : (parseFloat(document.getElementById(`pemakaian-${id}`)?.value) || 1) * qtyInput;
+
+          let subtotal = (pemakaianUnit * hargaSatuanDasar) * (1 + (waste / 100));
+          if (document.getElementById(`subtotal-bahan-${id}`)) {
+            document.getElementById(`subtotal-bahan-${id}`).innerText = 'Rp ' + Math.round(subtotal).toLocaleString('id-ID');
+          }
+          totalBahan += subtotal;
+        }
+      });
+
+      document.querySelectorAll('#container-proses > div').forEach(row => {
+        const id = row.id.replace('row-proses-', '');
+        const kategori = document.getElementById(`kategori-proses-${id}`)?.value;
+        let subtotalProsesBaris = 0;
+
+        if (kategori === 'mesin') {
+          const idMesin = document.getElementById(`select-mesin-${id}`)?.value;
+          const mesin = DB_MASTER_MESIN.find(m => (m.ID_Mesin || m.id) === idMesin);
+          const durasi = parseFloat(document.getElementById(`durasi-${id}`)?.value) || 0;
+          
+          let tarifPerMenit = 0;
+          if (mesin) {
+            const harga = Number(mesin.Harga_Perolehan || mesin.hargaBeli || 0);
+            const umur = Number(mesin.Estimasi_Umur_Jam || mesin.umurJam || 0);
+            const watt = Number(mesin.Daya_Watt || mesin.watt || 0);
+            const tarifKwh = Number(mesin.Tarif_Listrik_Per_kWh || mesin.tarifKwh || 0);
+
+            const depresiasiJam = umur > 0 ? (harga / umur) : 0;
+            const listrikJam = (watt / 1000) * tarifKwh;
+            tarifPerMenit = (depresiasiJam + listrikJam) / 60;
+          }
+          
+          subtotalProsesBaris = durasi * tarifPerMenit;
+          totalBiayaMesin += subtotalProsesBaris;
+        } else {
+          const upahFlat = getRawNumber(document.getElementById(`labor-${id}`)?.value);
+          subtotalProsesBaris = upahFlat;
+          totalBiayaUpah += subtotalProsesBaris;
+        }
+
+        if (document.getElementById(`subtotal-proses-${id}`)) {
+          document.getElementById(`subtotal-proses-${id}`).innerText = 'Rp ' + Math.round(subtotalProsesBaris).toLocaleString('id-ID');
+        }
+      });
+
+      let totalHPP = totalBahan + totalBiayaMesin + totalBiayaUpah;
+      let marginTarget = parseFloat(document.getElementById('margin-target')?.value) || 0;
+
+      let hargaJualFinal = 0;
+      if (marginTarget < 100 && totalHPP > 0) {
+        let hargaJualKasar = totalHPP / (1 - (marginTarget / 100));
+        hargaJualFinal = Math.ceil(hargaJualKasar / 500) * 500;
+      } else {
+        hargaJualFinal = Math.ceil(totalHPP / 500) * 500;
+      }
+
+      if (document.getElementById('summary-biaya-bahan')) document.getElementById('summary-biaya-bahan').innerText = 'Rp ' + Math.round(totalBahan).toLocaleString('id-ID');
+      if (document.getElementById('summary-biaya-mesin')) document.getElementById('summary-biaya-mesin').innerText = 'Rp ' + Math.round(totalBiayaMesin).toLocaleString('id-ID');
+      if (document.getElementById('summary-biaya-upah')) document.getElementById('summary-biaya-upah').innerText = 'Rp ' + Math.round(totalBiayaUpah).toLocaleString('id-ID');
+
+      if (document.getElementById('text-total-hpp')) document.getElementById('text-total-hpp').innerText = 'Rp ' + Math.round(totalHPP).toLocaleString('id-ID');
+      if (document.getElementById('text-harga-jual')) document.getElementById('text-harga-jual').innerText = 'Rp ' + hargaJualFinal.toLocaleString('id-ID');
+      if (document.getElementById('text-margin-percent')) document.getElementById('text-margin-percent').innerText = marginTarget;
+
+      hitungSimulasiMarketplace();
+    }
+
+    function simpanKalkulasiProduk() {
+      const namaProdukInput = document.getElementById('nama-produk');
+      const namaProduk = namaProdukInput?.value.trim();
+      const marginTarget = parseFloat(document.getElementById('margin-target')?.value) || 0;
+
+      if (!namaProduk) {
+        showWarningModal("Nama Produk Wajib Diisi", "Silakan masukkan nama produk atau pesanan custom terlebih dahulu.");
+        namaProdukInput?.focus();
+        return;
+      }
+
+      let listBahan = [];
+      document.querySelectorAll('#container-bahan > div').forEach(row => {
+        const id = row.id.replace('row-bahan-', '');
+        const idBahan = document.getElementById(`select-bahan-${id}`)?.value;
+        const pPakai = parseFloat(document.getElementById(`p-pakai-${id}`)?.value) || 0;
+        const lPakai = parseFloat(document.getElementById(`l-pakai-${id}`)?.value) || 0;
+        const pemakaianMlGram = parseFloat(document.getElementById(`pemakaian-${id}`)?.value) || 0;
+        
+        let qtyInput = parseFloat(document.getElementById(`qty-${id}`)?.value);
+        if (isNaN(qtyInput) || qtyInput <= 0) qtyInput = 1;
+
+        const waste = parseFloat(document.getElementById(`waste-${id}`)?.value) || 0;
+        const subtotalText = document.getElementById(`subtotal-bahan-${id}`)?.innerText || 'Rp 0';
+
+        if (idBahan && idBahan !== "") {
+          listBahan.push({
+            idBahan: idBahan,
+            panjang: pPakai,
+            lebar: lPakai,
+            pemakaianMlGram: pemakaianMlGram,
+            qtyLayerPcs: qtyInput,
+            bahanTerbuang: waste,
+            subtotal: subtotalText
+          });
+        }
+      });
+
+      let listProses = [];
+      document.querySelectorAll('#container-proses > div').forEach(row => {
+        const id = row.id.replace('row-proses-', '');
+        const kategori = document.getElementById(`kategori-proses-${id}`)?.value;
+        const idMesin = document.getElementById(`select-mesin-${id}`)?.value;
+        const durasi = parseFloat(document.getElementById(`durasi-${id}`)?.value) || 0;
+        const labor = getRawNumber(document.getElementById(`labor-${id}`)?.value) || 0;
+        const subtotalText = document.getElementById(`subtotal-proses-${id}`)?.innerText || 'Rp 0';
+
+        let isValidProses = false;
+        if (kategori === 'mesin' && idMesin && idMesin !== "" && durasi > 0) {
+          isValidProses = true;
+        } else if (kategori === 'tenaga' && labor > 0) {
+          isValidProses = true;
+        }
+
+        if (isValidProses) {
+          listProses.push({
+            kategoriProses: kategori,
+            idMesin: idMesin,
+            durasi: durasi,
+            laborFlat: labor,
+            subtotal: subtotalText
+          });
+        }
+      });
+
+      if (listBahan.length === 0 && listProses.length === 0) {
+        showWarningModal("Komponen Biaya Kosong", "Masukkan minimal 1 Bahan Baku atau 1 Proses (Mesin/Tenaga Kerja) yang valid sebelum menyimpan!");
+        return;
+      }
+
+      const totalBahan = document.getElementById('summary-biaya-bahan')?.innerText || 'Rp 0';
+      const totalMesin = document.getElementById('summary-biaya-mesin')?.innerText || 'Rp 0';
+      const totalUpah = document.getElementById('summary-biaya-upah')?.innerText || 'Rp 0';
+      const totalHPP = document.getElementById('text-total-hpp')?.innerText || 'Rp 0';
+      const hargaJual = document.getElementById('text-harga-jual')?.innerText || 'Rp 0';
+
+      const payload = {
+        namaProduk: namaProduk,
+        marginTarget: marginTarget,
+        totalBahan: totalBahan,
+        totalMesin: totalMesin,
+        totalUpah: totalUpah,
+        totalHPP: totalHPP,
+        hargaJual: hargaJual,
+        detailBahan: listBahan,
+        detailProses: listProses
+      };
+
+      showLoading("Menyimpan Produk...", "Mengirim data produk ke database");
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            showSuccess("Berhasil Tersimpan!", `Produk "${namaProduk}" telah berhasil masuk database.`, function() {
+              resetFormKalkulator();
+            });
+          })
+          .withFailureHandler(function(err) {
+            hideLoading();
+            showWarningModal("Gagal Menyimpan", err.message);
+          })
+          .simpanProdukKeSheet(payload);
+      } else {
+        setTimeout(function() {
+          showSuccess("Berhasil (Mode Demo)", `Data "${namaProduk}" berhasil disimulasikan.`, function() {
+            resetFormKalkulator();
+          });
+        }, 800);
+      }
+    }
+
+    function showWarningModal(judul, pesan) {
+      hideLoading();
+      const existingModal = document.getElementById('modal-warning-custom');
+      if (existingModal) existingModal.remove();
+
+      const modalHtml = `
+        <div id="modal-warning-custom" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center transform transition-all scale-100 animate-fade-in">
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+              <i class="fas fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-800 mb-2">${judul}</h3>
+            <p class="text-xs text-slate-600 mb-6 leading-relaxed">${pesan}</p>
+            <button onclick="closeWarningModal()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all">
+              Saya Mengerti
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function closeWarningModal() {
+      const modal = document.getElementById('modal-warning-custom');
+      if (modal) modal.remove();
+    }
+
+    function resetFormKalkulator() {
+      document.getElementById('nama-produk').value = '';
+      document.getElementById('margin-target').value = '50';
+      document.getElementById('container-bahan').innerHTML = '';
+      document.getElementById('container-proses').innerHTML = '';
+      hitungTotalHPP();
+    }
+
+    function renderTabelBahan(data) {
+      const tbody = document.getElementById("tbody-master-bahan");
+      if (!tbody) return;
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Belum ada data master bahan.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      data.forEach((item) => {
+        const id = item.ID_Bahan || item.id || '';
+        const nama = item.Nama_Bahan || item.nama || '-';
+        const tipe = item.Tipe_Bahan || item.tipe || '-';
+        const hargaBeli = Number(item.Harga_Beli || item.hargaBeli || 0);
+        
+        const p = item.Dimensi_Panjang_cm || item.Panjang_cm || item.p || '';
+        const l = item.Dimensi_Lebar_cm || item.Lebar_cm || item.l || '';
+        const vol = item.Volume_ml || item.volume || '';
+        const pcs = item.Isi_Pcs || item.pcs || '';
+        const berat = item.Berat_gram || item.berat || '';
+
+        let infoDimensi = tipe;
+        if (tipe === 'Lembaran' && p && l) {
+          infoDimensi = `${tipe} (${p}x${l} cm)`;
+        } else if (tipe === 'Panjang' && p) {
+          infoDimensi = `${tipe} (${p} cm)`;
+        } else if (tipe === 'Cairan' && vol) {
+          infoDimensi = `${tipe} (${vol} ml)`;
+        } else if (tipe === 'Satuan' && pcs) {
+          infoDimensi = `${tipe} (${pcs} Pcs)`;
+        } else if (tipe === 'Berat' && berat) {
+          infoDimensi = `${tipe} (${berat} Gr)`;
+        }
+
+        html += `
+          <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
+            <td class="p-2.5 font-bold text-slate-800">${nama}</td>
+            <td class="p-2.5 text-slate-600">${infoDimensi}</td>
+            <td class="p-2.5 text-right font-mono font-bold text-slate-700">Rp ${hargaBeli.toLocaleString('id-ID')}</td>
+            <td class="p-2.5 text-center space-x-1">
+              <button onclick="editBahan('${id}')" class="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg transition" title="Edit"><i class="fas fa-edit text-xs"></i></button>
+              <button onclick="hapusBahan('${id}')" class="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition" title="Hapus"><i class="fas fa-trash text-xs"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function renderTabelMesin(data) {
+      const tbody = document.getElementById("tbody-master-mesin");
+      if (!tbody) return;
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Belum ada data master mesin.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      data.forEach((item) => {
+        const id = item.ID_Mesin || item.id || '';
+        const nama = item.Nama_Mesin || item.nama || '-';
+        const harga = Number(item.Harga_Perolehan || item.hargaBeli || 0);
+        const umur = Number(item.Estimasi_Umur_Jam || item.umurJam || 0);
+        const watt = Number(item.Daya_Watt || item.watt || 0);
+        const tarifKwh = Number(item.Tarif_Listrik_Per_kWh || item.tarifKwh || 0);
+
+        const depresiasiJam = umur > 0 ? (harga / umur) : 0;
+        const listrikJam = (watt / 1000) * tarifKwh;
+        const tarifPerJam = Math.round(depresiasiJam + listrikJam);
+
+        html += `
+          <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
+            <td class="p-2.5 font-bold text-slate-800">${nama}</td>
+            <td class="p-2.5 text-slate-600">${watt} W | ${umur} Jam</td>
+            <td class="p-2.5 text-right font-mono font-bold text-slate-700">Rp ${tarifPerJam.toLocaleString('id-ID')} /jam</td>
+            <td class="p-2.5 text-center space-x-1">
+              <button onclick="editMesin('${id}')" class="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg transition" title="Edit"><i class="fas fa-edit text-xs"></i></button>
+              <button onclick="hapusMesin('${id}')" class="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition" title="Hapus"><i class="fas fa-trash text-xs"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function submitMasterBahan(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btn-simpan-bahan");
+      const idBahan = document.getElementById("m-id-bahan") ? document.getElementById("m-id-bahan").value : "";
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...`;
+      }
+
+      const payload = {
+        idBahan: idBahan,
+        nama: document.getElementById("m-nama-bahan").value,
+        tipe: document.getElementById("m-tipe-bahan").value,
+        hargaBeli: cleanNumber(document.getElementById("m-harga-beli").value),
+        p: Number(document.getElementById("m-panjang") ? document.getElementById("m-panjang").value : 0),
+        l: Number(document.getElementById("m-lebar") ? document.getElementById("m-lebar").value : 0),
+        volume: Number(document.getElementById("m-volume") ? document.getElementById("m-volume").value : 0),
+        berat: Number(document.getElementById("m-berat") ? document.getElementById("m-berat").value : 0),
+        pcs: Number(document.getElementById("m-pcs") ? document.getElementById("m-pcs").value : 0)
+      };
+
+      const scriptMethod = idBahan ? 'updateBahanKeSheet' : 'simpanBahanKeSheet';
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = `<i class="fas fa-plus-circle mr-2"></i>SIMPAN MASTER BAHAN`;
+            }
+            if (res && res.status === "success") {
+              resetFormMasterBahan();
+              loadMasterData();
+            } else {
+              alert("Gagal: " + (res ? res.message : "Terjadi kesalahan"));
+            }
+          })
+          .withFailureHandler(onFailure)
+          [scriptMethod](payload);
+      }
+    }
+
+    function editBahan(id) {
+      const item = DB_MASTER_BAHAN.find(b => (b.ID_Bahan || b.id) === id);
+      if (!item) return;
+
+      document.getElementById("m-id-bahan").value = id;
+      document.getElementById("m-nama-bahan").value = item.Nama_Bahan || item.nama || '';
+      document.getElementById("m-tipe-bahan").value = item.Tipe_Bahan || item.tipe || 'Lembaran';
+      document.getElementById("m-harga-beli").value = (item.Harga_Beli || item.hargaBeli || 0).toLocaleString('id-ID');
+      
+      toggleFormMasterBahan();
+
+      if (document.getElementById("m-panjang")) document.getElementById("m-panjang").value = item.Dimensi_Panjang_cm || item.Panjang_cm || 0;
+      if (document.getElementById("m-lebar")) document.getElementById("m-lebar").value = item.Dimensi_Lebar_cm || item.Lebar_cm || 0;
+      if (document.getElementById("m-volume")) document.getElementById("m-volume").value = item.Volume_ml || 0;
+      if (document.getElementById("m-berat")) document.getElementById("m-berat").value = item.Berat_gram || 0;
+      if (document.getElementById("m-pcs")) document.getElementById("m-pcs").value = item.Isi_Pcs || 0;
+
+      const labelMode = document.getElementById("label-mode-bahan");
+      if (labelMode) {
+        labelMode.innerText = "Mode Edit: " + id;
+        labelMode.classList.remove("hidden");
+      }
+    }
+
+    function hapusBahan(id) {
+      const item = DB_MASTER_BAHAN.find(b => (b.ID_Bahan || b.id) === id);
+      const namaBahan = item ? (item.Nama_Bahan || item.nama) : id;
+
+      Swal.fire({
+        title: 'Hapus Bahan Baku?',
+        text: `Apakah Anda yakin ingin menghapus "${namaBahan}" (${id})?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        customClass: { popup: 'rounded-2xl' }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Menghapus Data...',
+            text: 'Mohon tunggu sebentar',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+
+          google.script.run
+            .withSuccessHandler((res) => {
+              if (res && res.status === "success") {
+                Swal.fire({ icon: 'success', title: 'Terhapus!', timer: 1500, showConfirmButton: false });
+                loadMasterData();
+              } else {
+                Swal.fire('Gagal!', res ? res.message : 'Terjadi kesalahan', 'error');
+              }
+            })
+            .withFailureHandler((err) => { Swal.fire('Error!', err.message, 'error'); })
+            .hapusDataFromSheet('Master_Bahan', 'ID_Bahan', id);
+        }
+      });
+    }
+
+    function resetFormMasterBahan() {
+      const form = document.getElementById("form-master-bahan");
+      if (form) form.reset();
+      const idBahan = document.getElementById("m-id-bahan");
+      if (idBahan) idBahan.value = "";
+      const labelMode = document.getElementById("label-mode-bahan");
+      if (labelMode) labelMode.classList.add("hidden");
+      toggleFormMasterBahan();
+    }
+
+    function submitMasterMesin(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btn-simpan-mesin");
+      const idMesin = document.getElementById("m-id-mesin") ? document.getElementById("m-id-mesin").value : "";
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...`;
+      }
+
+      const payload = {
+        idMesin: idMesin,
+        nama: document.getElementById("m-nama-mesin").value,
+        hargaBeli: cleanNumber(document.getElementById("m-harga-mesin").value),
+        umurJam: Number(document.getElementById("m-umur-mesin").value) || 0,
+        watt: Number(document.getElementById("m-watt").value) || 0,
+        tarifKwh: cleanNumber(document.getElementById("m-tarif-kwh").value) || 0
+      };
+
+      const scriptMethod = idMesin ? 'updateMesinKeSheet' : 'simpanMesinKeSheet';
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = `<i class="fas fa-plus-circle mr-2"></i>SIMPAN MASTER MESIN`;
+            }
+            if (res && res.status === "success") {
+              resetFormMasterMesin();
+              loadMasterData();
+            } else {
+              alert("Gagal: " + (res ? res.message : "Terjadi kesalahan"));
+            }
+          })
+          .withFailureHandler(onFailure)
+          [scriptMethod](payload);
+      }
+    }
+
+    function editMesin(id) {
+      const item = DB_MASTER_MESIN.find(m => (m.ID_Mesin || m.id) === id);
+      if (!item) return;
+
+      document.getElementById("m-id-mesin").value = id;
+      document.getElementById("m-nama-mesin").value = item.Nama_Mesin || item.nama || '';
+      document.getElementById("m-harga-mesin").value = (item.Harga_Perolehan || item.hargaBeli || 0).toLocaleString('id-ID');
+      document.getElementById("m-umur-mesin").value = item.Estimasi_Umur_Jam || item.umurJam || 0;
+      document.getElementById("m-watt").value = item.Daya_Watt || item.watt || 0;
+      document.getElementById("m-tarif-kwh").value = (item.Tarif_Listrik_Per_kWh || item.tarifKwh || 0).toLocaleString('id-ID');
+
+      const labelMode = document.getElementById("label-mode-mesin");
+      if (labelMode) {
+        labelMode.innerText = "Mode Edit: " + id;
+        labelMode.classList.remove("hidden");
+      }
+    }
+
+    function hapusMesin(id) {
+      const item = DB_MASTER_MESIN.find(m => (m.ID_Mesin || m.id) === id);
+      const namaMesin = item ? (item.Nama_Mesin || item.nama) : id;
+
+      Swal.fire({
+        title: 'Hapus Master Mesin?',
+        text: `Apakah Anda yakin ingin menghapus "${namaMesin}" (${id})?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        customClass: { popup: 'rounded-2xl' }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Menghapus Data...',
+            text: 'Mohon tunggu sebentar',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+
+          google.script.run
+            .withSuccessHandler((res) => {
+              if (res && res.status === "success") {
+                Swal.fire({ icon: 'success', title: 'Terhapus!', timer: 1500, showConfirmButton: false });
+                loadMasterData();
+              } else {
+                Swal.fire('Gagal!', res ? res.message : 'Terjadi kesalahan', 'error');
+              }
+            })
+            .withFailureHandler((err) => { Swal.fire('Error!', err.message, 'error'); })
+            .hapusDataFromSheet('Master_Mesin', 'ID_Mesin', id);
+        }
+      });
+    }
+
+    function resetFormMasterMesin() {
+      const form = document.getElementById("form-master-mesin");
+      if (form) form.reset();
+      const idMesin = document.getElementById("m-id-mesin");
+      if (idMesin) idMesin.value = "";
+      const labelMode = document.getElementById("label-mode-mesin");
+      if (labelMode) labelMode.classList.add("hidden");
+    }
+
+    function filterTabelBahan() {
+      const query = document.getElementById("search-master-bahan").value.toLowerCase();
+      const filtered = DB_MASTER_BAHAN.filter(b => {
+        const nama = b.Nama_Bahan || b.nama || '';
+        return String(nama).toLowerCase().includes(query);
+      });
+      renderTabelBahan(filtered);
+    }
+
+    function filterTabelMesin() {
+      const query = document.getElementById("search-master-mesin").value.toLowerCase();
+      const filtered = DB_MASTER_MESIN.filter(m => {
+        const nama = m.Nama_Mesin || m.nama || '';
+        return String(nama).toLowerCase().includes(query);
+      });
+      renderTabelMesin(filtered);
+    }
+
+    function onFailure(err) {
+      hideLoading();
+      alert("Terjadi kesalahan sistem: " + err.message);
+    }
+
+    function loadDataMarketplace() {
+      const tbody = document.getElementById('tbody-master-mp');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Memuat data dari Google Sheets...</td></tr>`;
+      }
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(programs) {
+            window.masterMarketplace = Array.isArray(programs) ? programs : [];
+            renderTabelMarketplace(window.masterMarketplace);
+            hitungSimulasiMarketplace();
+          })
+          .withFailureHandler(function(err) {
+            console.error("Gagal memuat data marketplace:", err);
+          })
+          .getMarketplacePrograms();
+      }
+    }
+
+    function hitungSimulasiMarketplace() {
+      const elHargaOffline = document.getElementById("text-harga-jual");
+      if (!elHargaOffline) return;
+
+      let targetNet = parseFloat(elHargaOffline.innerText.replace(/[^0-9]/g, "")) || 0;
+      const channels = ["Shopee", "TikTok Shop", "Tokopedia"];
+
+      channels.forEach(ch => {
+        const idTarget = ch === "Shopee" ? "harga-mp-shopee" : ch === "TikTok Shop" ? "harga-mp-tiktok" : "harga-mp-tokopedia";
+        const elResult = document.getElementById(idTarget);
+        if (!elResult) return;
+
+        const listMaster = (typeof window.masterMarketplace !== 'undefined' && Array.isArray(window.masterMarketplace)) ? window.masterMarketplace : [];
+
+        const activeProgram = listMaster.filter(x => {
+          const chName = String(x.channel || x.channelName || x.marketplace || x.namaChannel || '').trim();
+          const matchChannel = chName.toLowerCase() === ch.toLowerCase();
+          const statusVal = x.aktif !== undefined ? x.aktif : (x.statusAktif !== undefined ? x.statusAktif : x.status);
+          const matchStatus = (statusVal === true || String(statusVal).toUpperCase() === "TRUE" || statusVal === 1);
+          return matchChannel && matchStatus;
+        });
+
+        if (activeProgram.length === 0) {
+          elResult.innerText = "Belum ada Program";
+          elResult.className = "font-sans font-normal text-slate-400 text-[11px] italic";
+          return;
+        }
+
+        if (targetNet <= 0) {
+          elResult.innerText = "Rp 0";
+          elResult.className = "font-mono font-bold text-slate-400";
+          return;
+        }
+
+        let totalPersen = 0;
+        let totalFixed = 0;
+
+        activeProgram.forEach(p => {
+          totalPersen += parseFloat(p.persen || p.persenBiaya || p.potonganPersen || p.feePersen || 0);
+          totalFixed += parseFloat(p.fixed || p.fixedFee || p.biayaTetap || 0);
+        });
+
+        let marginDecimal = totalPersen / 100;
+        let hargaJualMP = 0;
+
+        if (marginDecimal < 1) {
+          hargaJualMP = (targetNet + totalFixed) / (1 - marginDecimal);
+        } else {
+          hargaJualMP = targetNet;
+        }
+
+        hargaJualMP = Math.ceil(hargaJualMP / 100) * 100;
+
+        elResult.innerText = `Rp ${hargaJualMP.toLocaleString("id-ID")}`;
+        elResult.className = "font-mono font-bold text-amber-300";
+      });
+    }
+
+    function renderTabelMarketplace(data) {
+  const tbody = document.getElementById('tbody-master-mp');
+  if (!tbody) return;
+
+  if (!data || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada program marketplace terdaftar</td></tr>`;
+    return;
+  }
+
+  let html = '';
+  data.forEach((item, index) => {
+    const isChecked = item.statusAktif;
+    const channel = item.channel || '-';
+    const namaProg = item.namaProgram || '-';
+    const persen = parseFloat(item.persenBiaya || 0);
+    const fixed = parseFloat(item.fixedFee || 0);
+    const rowId = item.rowId;
+
+    // Encode data ke string agar aman dilempar ke fungsi edit
+    const itemString = JSON.stringify(item).replace(/"/g, '&quot;');
+
+    html += `
+      <tr class="border-b border-slate-700/50 hover:bg-slate-800/50">
+        <td class="p-3 text-center">
+          <input type="checkbox" 
+                 class="w-4 h-4 text-amber-500 rounded border-slate-600 bg-slate-700 focus:ring-amber-400 cursor-pointer"
+                 ${isChecked ? 'checked' : ''} 
+                 onchange="toggleStatusMarketplace(${rowId}, this.checked)">
+        </td>
+        <td class="p-3 font-medium text-slate-200">${channel}</td>
+        <td class="p-3 text-slate-300">${namaProg}</td>
+        <td class="p-3 text-right font-mono text-amber-400">${persen}%</td>
+        <td class="p-3 text-right font-mono text-slate-300">Rp ${fixed.toLocaleString('id-ID')}</td>
+        <td class="p-3 text-center space-x-1">
+          <button onclick="persiapkanEditProgram(${itemString})" title="Edit Program" class="p-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg transition">
+            <i class="fas fa-pencil text-xs"></i>
+          </button>
+          <button onclick="konfirmasiHapusProgram(${rowId}, '${namaProg}')" title="Hapus Program" class="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 rounded-lg transition">
+            <i class="fas fa-trash text-xs"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+    // Variabel pengunci global (taruh paling atas script atau luar fungsi)
+let isSavingMarketplace = false;
+
+function simpanProgramMarketplace() {
+  // A. Jika sedang proses simpan, STOP langsung!
+  if (isSavingMarketplace) {
+    console.log("Proses simpan sedang berjalan, mengabaikan klik ganda.");
+    return;
+  }
+
+  const selectChannel = document.getElementById("mp-channel").value;
+  const customChannel = document.getElementById("mp-channel-custom") ? document.getElementById("mp-channel-custom").value.trim() : "";
+  const namaProgram   = document.getElementById("mp-nama-program").value.trim();
+  const persenBiaya   = parseFloat(document.getElementById("mp-persen").value) || 0;
+  const fixedFee      = parseFloat(document.getElementById("mp-fixed").value) || 0;
+  const rowId         = document.getElementById("mp-row-id") ? document.getElementById("mp-row-id").value : "";
+
+  // 1. Validasi Combo-Input
+  let channelFinal = selectChannel;
+  if (selectChannel === "Lainnya") {
+    if (!customChannel) {
+      alert("Nama Channel / Marketplace baru wajib diisi!");
+      document.getElementById("mp-channel-custom").focus();
+      return;
+    }
+    channelFinal = customChannel;
+  }
+
+  // 2. Validasi Nama Program
+  if (!namaProgram) {
+    alert("Nama Program/Biaya wajib diisi!");
+    return;
+  }
+
+  // B. SET FLAG KUNCI & DISABLE TOMBOL
+  isSavingMarketplace = true;
+  const form = document.getElementById('form-master-mp');
+  const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+  }
+
+  const payload = {
+    rowId: rowId,
+    channel: channelFinal,
+    namaProgram: namaProgram,
+    persenBiaya: persenBiaya,
+    fixedFee: fixedFee
+  };
+
+  showLoading("Menyimpan Program...", "Mengirim data program ke database");
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        // LEPAS KUNCI
+        isSavingMarketplace = false;
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        showSuccess("Berhasil!", "Program marketplace berhasil disimpan.", function() {
+          resetFormMarketplace();
+          loadDataMarketplace();
+        });
+      })
+      .withFailureHandler(function(err) {
+        // LEPAS KUNCI JIKA ERROR
+        isSavingMarketplace = false;
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        hideLoading();
+        alert("Gagal menyimpan program: " + err.message);
+      })
+      .simpanProgramMarketplace(payload);
+  } else {
+    isSavingMarketplace = false;
+  }
+}
+
+    function toggleStatusMarketplace(rowId, status) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            loadDataMarketplace();
+          })
+          .withFailureHandler(function(err) {
+            alert("Gagal mengubah status: " + err.message);
+          })
+          .toggleStatusMarketplace(rowId, status);
+      }
+    }
+
+    function resetFormMarketplace() {
+      document.getElementById("form-master-mp").reset();
+      document.getElementById("mp-row-id").value = "";
+    }
+
+    function toggleCustomChannelInput() {
+  const selectChannel = document.getElementById('mp-channel');
+  const inputCustom   = document.getElementById('mp-channel-custom');
+  
+  if (selectChannel && inputCustom) {
+    if (selectChannel.value === 'Lainnya') {
+      inputCustom.classList.remove('hidden');
+      inputCustom.focus();
+    } else {
+      inputCustom.classList.add('hidden');
+      inputCustom.value = '';
+    }
+  }
+}
+
+    // A. Lempar data dari tabel ke Form Kiri saat klik Edit
+// 1. FUNGSI EDIT PROGRAM (Memindahkan Data ke Form Kiri)
+function persiapkanEditProgram(item) {
+  const elRowId   = document.getElementById('mp-row-id');
+  const elChannel = document.getElementById('mp-channel');
+  const elCustom  = document.getElementById('mp-channel-custom');
+  const elNama    = document.getElementById('mp-nama-program');
+  const elPersen  = document.getElementById('mp-persen');
+  const elFixed   = document.getElementById('mp-fixed');
+
+  if (elRowId)  elRowId.value  = item.rowId;
+  if (elNama)   elNama.value   = item.namaProgram || '';
+  if (elPersen) elPersen.value = item.persenBiaya || 0;
+  if (elFixed)  elFixed.value  = item.fixedFee || 0;
+
+  // Cek apakah channel item terdaftar di dropdown bawaan
+  if (elChannel) {
+    const channelTarget = String(item.channel || '').trim().toLowerCase();
+    let isFound = false;
+
+    for (let i = 0; i < elChannel.options.length; i++) {
+      if (elChannel.options[i].value.trim().toLowerCase() === channelTarget && elChannel.options[i].value !== 'Lainnya') {
+        elChannel.selectedIndex = i;
+        isFound = true;
+        break;
+      }
+    }
+
+    // Jika channel tidak ada di list bawaan (misal: "Facebook"), set ke 'Lainnya' dan isi input custom
+    if (!isFound) {
+      elChannel.value = 'Lainnya';
+      if (elCustom) {
+        elCustom.value = item.channel;
+        elCustom.classList.remove('hidden');
+      }
+    } else {
+      if (elCustom) {
+        elCustom.value = '';
+        elCustom.classList.add('hidden');
+      }
+    }
+  }
+
+  // Ubah tombol ke Mode Update
+  const form = document.getElementById('form-master-mp');
+  const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
+  if (btnSubmit) {
+    btnSubmit.innerHTML = '<i class="fas fa-sync mr-2"></i>UPDATE PROGRAM';
+    btnSubmit.classList.remove('bg-slate-900', 'text-amber-400');
+    btnSubmit.classList.add('bg-blue-600', 'text-white');
+  }
+}
+
+// 2. FUNGSI RESET FORM MARKETPLACE
+function resetFormMarketplace() {
+  const elRowId   = document.getElementById('mp-row-id');
+  const elChannel = document.getElementById('mp-channel');
+  const elCustom  = document.getElementById('mp-channel-custom');
+  const elNama    = document.getElementById('mp-nama-program');
+  const elPersen  = document.getElementById('mp-persen');
+  const elFixed   = document.getElementById('mp-fixed');
+
+  if (elRowId)   elRowId.value   = '';
+  if (elChannel) elChannel.selectedIndex = 0;
+  if (elCustom) {
+    elCustom.value = '';
+    elCustom.classList.add('hidden');
+  }
+  if (elNama)    elNama.value    = '';
+  if (elPersen)  elPersen.value  = '';
+  if (elFixed)   elFixed.value   = '';
+
+  // Kembalikan Tombol ke Mode Simpan
+  const form = document.getElementById('form-master-mp');
+  const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
+  if (btnSubmit) {
+    btnSubmit.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>SIMPAN PROGRAM';
+    btnSubmit.classList.remove('bg-blue-600', 'text-white');
+    btnSubmit.classList.add('bg-slate-900', 'text-amber-400');
+  }
+}
+
+// 3. FUNGSI SIMPAN PROGRAM (Menangani Tambah & Edit tanpa Duplikat)
+function simpanProgramMarketplace() {
+  const selectChannel = document.getElementById("mp-channel").value;
+  const customChannel = document.getElementById("mp-channel-custom") ? document.getElementById("mp-channel-custom").value.trim() : "";
+  const namaProgram   = document.getElementById("mp-nama-program").value.trim();
+  const persenBiaya   = parseFloat(document.getElementById("mp-persen").value) || 0;
+  const fixedFee      = parseFloat(document.getElementById("mp-fixed").value) || 0;
+  const rowId         = document.getElementById("mp-row-id") ? document.getElementById("mp-row-id").value : "";
+
+  // 1. Ambil nama Channel (Combo-Input)
+  let channelFinal = selectChannel;
+  if (selectChannel === "Lainnya") {
+    if (!customChannel) {
+      alert("Nama Channel / Marketplace baru wajib diisi!");
+      document.getElementById("mp-channel-custom").focus();
+      return;
+    }
+    channelFinal = customChannel;
+  }
+
+  // 2. Validasi
+  if (!namaProgram) {
+    alert("Nama Program/Biaya wajib diisi!");
+    return;
+  }
+
+  const payload = {
+    rowId: rowId,
+    channel: channelFinal,
+    namaProgram: namaProgram,
+    persenBiaya: persenBiaya,
+    fixedFee: fixedFee
+  };
+
+  // 3. LOGO MUTER-MUTER DI TENGAH LAYAR + KUNCI DIKLIK (allowOutsideClick: false)
+  Swal.fire({
+    title: 'Menyimpan Program...',
+    text: 'Mohon tunggu sebentar',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading(); // Tampilkan animasi lingkaran muter
+    }
+  });
+
+  // 4. Kirim ke Backend
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        // Tampilkan Notif Berhasil Centang Hijau
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Program marketplace berhasil disimpan.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        resetFormMarketplace();
+        loadDataMarketplace();
+      })
+      .withFailureHandler(function(err) {
+        Swal.fire('Gagal!', err.message, 'error');
+      })
+      .simpanProgramMarketplace(payload);
+  }
+}
+
+// D. Konfirmasi & Hapus Program (SweetAlert2 di Tengah Layar)
+function konfirmasiHapusProgram(rowId, namaProg) {
+  Swal.fire({
+    title: 'Hapus Program?',
+    text: `Apakah Anda yakin ingin menghapus program "${namaProg}"?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444', // Merah
+    cancelButtonColor: '#64748b',  // Abu-abu / Slate
+    confirmButtonText: 'Ya, Hapus!',
+    cancelButtonText: 'Batal',
+    reverseButtons: true,
+    customClass: {
+      popup: 'rounded-2xl shadow-2xl border border-slate-100',
+      title: 'text-slate-800 font-extrabold text-lg',
+      htmlContainer: 'text-slate-600 text-sm'
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      
+      // Indikator Loading saat proses hapus berjalan
+      Swal.fire({
+        title: 'Menghapus...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Kirim perintah hapus ke Backend Code.gs
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Terhapus!',
+              text: 'Program berhasil dihapus.',
+              timer: 1500,
+              showConfirmButton: false
+            });
+
+            // Reset form jika item yang dihapus sedang dibuka di form edit
+            const currentEditId = document.getElementById('mp-row-id')?.value;
+            if (currentEditId == rowId) {
+              resetFormMarketplace();
+            }
+
+            // Reload data tabel
+            loadDataMarketplace();
+          } else {
+            Swal.fire('Gagal!', res.message, 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          Swal.fire('Error System!', err.message, 'error');
+        })
+        .hapusProgramMarketplace(rowId);
+    }
+  });
+}
+  </script>
+</body>
+</html>
