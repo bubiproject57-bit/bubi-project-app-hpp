@@ -56,32 +56,26 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* =========================================================
-       FORCE FIX WARNA TEKS TABEL (GLOBAL OVERRIDE)
-       ========================================================= */
-
-    /* 1. Jika Card Menggunakan Background Terang / Putih (.glass-card) */
+    /* FORCE FIX WARNA TEKS TABEL */
     .glass-card table th,
     .glass-card table td,
     .glass-card table td * {
-      color: #0f172a !important; /* Hitam pekat tegas */
+      color: #0f172a !important;
     }
 
-    /* 2. Jika Card Menggunakan Background Gelap (.glass-card-dark) */
     .glass-card-dark table th,
     .glass-card-dark table td,
     .glass-card-dark table td * {
-      color: #ffffff !important; /* Putih terang */
+      color: #ffffff !important;
     }
 
-    /* 3. Pengatur Warna Khusus Kolom Biaya (%) Agar Kontras */
     .glass-card table td:nth-child(4) {
-      color: #b45309 !important; /* Cokelat/Orange pekat di background putih */
+      color: #b45309 !important;
       font-weight: 700 !important;
     }
     
     .glass-card-dark table td:nth-child(4) {
-      color: #facc15 !important; /* Kuning terang di background gelap */
+      color: #facc15 !important;
       font-weight: 700 !important;
     }
 </style>
@@ -109,7 +103,6 @@
     <aside class="w-full md:w-64 glass-card-dark text-white p-5 flex md:flex-col justify-between items-center md:items-start shrink-0 border-b md:border-b-0 md:border-r border-slate-700/50 sticky top-0 z-40">
       
       <div class="flex items-center space-x-3 w-full border-b border-slate-700/60 pb-4">
-        <!-- LOGO BULAT UTUH PRESISI -->
         <img src="https://lh3.googleusercontent.com/d/11EvkqcfFqvqOt0FLc-4UsGh-UFnSCeeP" alt="Bubi project Logo" class="w-11 h-11 object-cover rounded-full shadow-lg border border-amber-500/30" onerror="this.onerror=null; this.src='https://placehold.co/100x100/f59e0b/ffffff?text=BP'">
         <div>
           <h1 class="font-extrabold text-base tracking-tight flex items-center text-white">
@@ -143,7 +136,7 @@
         </button>
       </nav>
 
-      <!-- BOTOM REFRESH BUTTON (DESKTOP) -->
+      <!-- BOTTOM REFRESH BUTTON (DESKTOP) -->
       <div class="w-full pt-4 border-t border-slate-700/60 hidden md:block">
         <button onclick="refreshData()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center space-x-2 transition border border-slate-700">
           <i class="fas fa-arrows-rotate text-xs" id="icon-refresh"></i>
@@ -158,14 +151,14 @@
 
     </aside>
 
-    <!-- AREA KERJA UTAMA (FULL WIDTH LAYOUT) -->
+    <!-- AREA KERJA UTAMA -->
     <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 w-full">
 
       <!-- TAB 1: KALKULATOR HPP (BOM) -->
       <div id="tab-kalkulator" class="tab-content space-y-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
           
-          <!-- KOLOM KIRI: INPUT FORM BOM (SPAN 8) -->
+          <!-- KOLOM KIRI: INPUT FORM BOM -->
           <div class="lg:col-span-8 space-y-5">
             
             <!-- IDENTITAS PRODUK -->
@@ -198,9 +191,7 @@
                   <i class="fas fa-plus mr-1.5"></i>Tambah Bahan
                 </button>
               </div>
-              <div id="container-bahan" class="space-y-3">
-                <!-- Item Bahan via JS -->
-              </div>
+              <div id="container-bahan" class="space-y-3"></div>
             </div>
 
             <!-- DETAIL MESIN & PROSES -->
@@ -213,21 +204,18 @@
                   <i class="fas fa-plus mr-1.5"></i>Tambah Proses
                 </button>
               </div>
-              <div id="container-proses" class="space-y-3">
-                <!-- Item Proses via JS -->
-              </div>
+              <div id="container-proses" class="space-y-3"></div>
             </div>
 
           </div>
 
-          <!-- KOLOM KANAN: PANEL RINGKASAN KALKULASI & SIMPAN PRODUK (SPAN 4) -->
+          <!-- KOLOM KANAN: PANEL RINGKASAN KALKULASI -->
           <div class="lg:col-span-4">
             <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-xl text-white space-y-5 sticky top-6">
               <h3 class="text-xs font-black tracking-wider uppercase text-amber-400 border-b border-slate-700/80 pb-3 flex items-center">
                 <i class="fas fa-calculator mr-2"></i>Ringkasan Kalkulasi HPP
               </h3>
 
-              <!-- Breakdown 3 Komponen Biaya -->
               <div class="space-y-3 text-xs">
                 <div class="flex justify-between items-center text-slate-300">
                   <span>Total Biaya Bahan</span>
@@ -245,13 +233,11 @@
 
               <hr class="border-slate-800">
 
-              <!-- Total HPP (Modal) -->
               <div class="flex justify-between items-baseline">
                 <span class="text-xs font-extrabold uppercase text-slate-400">Total HPP (Modal)</span>
                 <span id="text-total-hpp" class="text-lg font-black font-mono text-white">Rp 0</span>
               </div>
 
-              <!-- Box Rekomendasi Harga Jual Offline -->
               <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80 space-y-1">
                 <div class="flex justify-between text-[10px] font-extrabold uppercase text-amber-400">
                   <span>Harga Jual Standar (Offline)</span>
@@ -262,7 +248,6 @@
                 </div>
               </div>
 
-              <!-- SIMULASI MARKETPLACE (MULTI-CHANNEL) -->
               <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
                 <div class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider flex items-center justify-between border-b border-slate-800 pb-1.5">
                   <span><i class="fas fa-store text-amber-500 mr-1.5"></i>Rekomendasi Marketplace</span>
@@ -270,28 +255,10 @@
                 </div>
                 
                 <div id="container-rekomendasi-mp" class="space-y-1.5 text-xs">
-                  <div class="flex justify-between items-center py-1 border-b border-slate-800/50">
-                    <span class="text-slate-300 font-semibold flex items-center text-[11px]">
-                      <i class="fas fa-bag-shopping text-orange-500 mr-1.5"></i>Shopee
-                    </span>
-                    <span id="harga-mp-shopee" class="font-mono font-bold text-amber-300 text-[11px]">Rp 0</span>
-                  </div>
-                  <div class="flex justify-between items-center py-1 border-b border-slate-800/50">
-                    <span class="text-slate-300 font-semibold flex items-center text-[11px]">
-                      <i class="fab fa-tiktok text-slate-100 mr-1.5"></i>TikTok Shop
-                    </span>
-                    <span id="harga-mp-tiktok" class="font-mono font-bold text-amber-300 text-[11px]">Rp 0</span>
-                  </div>
-                  <div class="flex justify-between items-center py-1">
-                    <span class="text-slate-300 font-semibold flex items-center text-[11px]">
-                      <i class="fas fa-shop text-emerald-500 mr-1.5"></i>Tokopedia
-                    </span>
-                    <span id="harga-mp-tokopedia" class="font-mono font-bold text-amber-300 text-[11px]">Rp 0</span>
-                  </div>
+                  <div class="text-slate-500 text-[11px] italic text-center py-2">Memuat kalkulasi channel...</div>
                 </div>
               </div>
 
-              <!-- Tombol Simpan Produk -->
               <button type="button" onclick="simpanKalkulasiProduk()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 rounded-xl shadow-lg transition text-xs uppercase tracking-wider flex items-center justify-center active:scale-95">
                 <i class="fas fa-floppy-disk mr-2"></i>SIMPAN PRODUK
               </button>
@@ -305,7 +272,6 @@
       <div id="tab-bahan" class="tab-content hidden w-full">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
           
-          <!-- KIRI: FORM INPUT MASTER BAHAN (SPAN 5) -->
           <div class="lg:col-span-5">
             <div class="glass-card p-6 rounded-3xl shadow-xl space-y-5 bg-white/95 border border-white/60 sticky top-4">
               <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-200/80 pb-3 flex items-center justify-between">
@@ -338,7 +304,6 @@
                   </div>
                 </div>
 
-                <!-- INPUT FIELDS DINAMIS -->
                 <div id="field-dimensi" class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="text-xs font-bold text-slate-700 block mb-1">Panjang Utuh (cm)</label>
@@ -374,7 +339,6 @@
             </div>
           </div>
 
-          <!-- KANAN: TABEL DAFTAR MASTER BAHAN (SPAN 7) -->
           <div class="lg:col-span-7">
             <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 space-y-4">
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-3">
@@ -414,7 +378,6 @@
       <div id="tab-mesin" class="tab-content hidden w-full">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
           
-          <!-- KIRI: FORM INPUT MASTER MESIN (SPAN 5) -->
           <div class="lg:col-span-5">
             <div class="glass-card p-6 rounded-3xl shadow-xl space-y-5 bg-white/95 border border-white/60 sticky top-4">
               <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-200/80 pb-3 flex items-center justify-between">
@@ -464,7 +427,6 @@
             </div>
           </div>
 
-          <!-- KANAN: TABEL DAFTAR MASTER MESIN (SPAN 7) -->
           <div class="lg:col-span-7">
             <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 space-y-4">
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-3">
@@ -504,7 +466,6 @@
       <div id="tab-marketplace" class="tab-content hidden w-full">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
           
-          <!-- KIRI: FORM TAMBAH / EDIT PROGRAM (SPAN 5) -->
           <div class="lg:col-span-5">
             <div class="glass-card p-6 rounded-3xl shadow-xl space-y-5 bg-white/95 border border-white/60 sticky top-4">
               <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-200/80 pb-3 flex items-center justify-between">
@@ -516,8 +477,6 @@
 
                 <div>
                   <label class="text-xs font-bold text-slate-700 block mb-1">Channel / Marketplace</label>
-                  
-                  <!-- Ditambahkan event onchange di bawah ini -->
                   <select id="mp-channel" onchange="toggleCustomChannelInput()" class="w-full p-3 bg-white/90 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     <option value="Shopee">Shopee</option>
                     <option value="TikTok Shop">TikTok Shop</option>
@@ -526,7 +485,6 @@
                     <option value="Lainnya">Lainnya / Tambah Baru...</option>
                   </select>
 
-                  <!-- Input Teks Custom -->
                   <input type="text" id="mp-channel-custom" placeholder="Ketik nama channel (misal: Facebook, IG)" class="hidden w-full mt-2 p-3 bg-amber-50/50 border border-amber-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
                 </div>
 
@@ -558,7 +516,6 @@
             </div>
           </div>
 
-          <!-- KANAN: TABEL DAFTAR PROGRAM MARKETPLACE (SPAN 7) -->
           <div class="lg:col-span-7">
             <div class="glass-card p-6 rounded-3xl shadow-xl bg-white/95 border border-white/60 space-y-4">
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-3">
@@ -576,11 +533,12 @@
                       <th class="p-2.5">Nama Program</th>
                       <th class="p-2.5 text-right">Biaya (%)</th>
                       <th class="p-2.5 text-right">Fixed Fee</th>
+                      <th class="p-2.5 text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody id="tbody-master-mp" class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                     <tr>
-                      <td colspan="5" class="p-4 text-center text-slate-400 italic">Memuat data program marketplace...</td>
+                      <td colspan="6" class="p-4 text-center text-slate-400 italic">Memuat data program marketplace...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -623,6 +581,8 @@
   <!-- JAVASCRIPT LOGIC -->
   <script>
     let editRowId = null;
+    let isSavingMarketplace = false;
+
     if (typeof window.masterMarketplace === 'undefined') {
       window.masterMarketplace = [];
     }
@@ -1047,7 +1007,48 @@
       if (document.getElementById('text-harga-jual')) document.getElementById('text-harga-jual').innerText = 'Rp ' + hargaJualFinal.toLocaleString('id-ID');
       if (document.getElementById('text-margin-percent')) document.getElementById('text-margin-percent').innerText = marginTarget;
 
-      hitungSimulasiMarketplace();
+      renderRekomendasiMarketplaceDinamis(hargaJualFinal);
+    }
+
+    function renderRekomendasiMarketplaceDinamis(hargaJualOffline) {
+      const container = document.getElementById('container-rekomendasi-mp');
+      if (!container) return;
+
+      const listPrograms = window.listDataMarketplace || [];
+      const activePrograms = listPrograms.filter(p => p.statusAktif);
+
+      if (activePrograms.length === 0) {
+        container.innerHTML = `<div class="text-slate-400 text-[11px] italic text-center py-1">Belum ada program aktif</div>`;
+        return;
+      }
+
+      // Grouping berdasarkan Channel
+      const grouped = {};
+      activePrograms.forEach(p => {
+        if (!grouped[p.channel]) grouped[p.channel] = { totalPersen: 0, totalFixed: 0 };
+        grouped[p.channel].totalPersen += parseFloat(p.persenBiaya || 0);
+        grouped[p.channel].totalFixed += parseFloat(p.fixedFee || 0);
+      });
+
+      let html = '';
+      for (const [channel, fee] of Object.entries(grouped)) {
+        let marginDecimal = fee.totalPersen / 100;
+        let hargaMP = 0;
+        if (marginDecimal < 1) {
+          hargaMP = (hargaJualOffline + fee.totalFixed) / (1 - marginDecimal);
+        } else {
+          hargaMP = hargaJualOffline;
+        }
+        hargaMP = Math.ceil(hargaMP / 500) * 500;
+
+        html += `
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-slate-300 font-medium">${channel}</span>
+            <span class="font-mono font-bold text-amber-300">Rp ${hargaMP.toLocaleString('id-ID')}</span>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
     }
 
     function simpanKalkulasiProduk() {
@@ -1527,214 +1528,238 @@
     }
 
     function loadDataMarketplace() {
-      const tbody = document.getElementById('tbody-master-mp');
-      if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Memuat data dari Google Sheets...</td></tr>`;
-      }
-
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
-          .withSuccessHandler(function(programs) {
-            window.masterMarketplace = Array.isArray(programs) ? programs : [];
-            renderTabelMarketplace(window.masterMarketplace);
-            hitungSimulasiMarketplace();
+          .withSuccessHandler(function(data) {
+            try {
+              window.listDataMarketplace = Array.isArray(data) ? data : [];
+
+              if (typeof renderTabelMarketplace === 'function') {
+                renderTabelMarketplace(window.listDataMarketplace);
+              }
+
+              const elHarga = document.getElementById('text-harga-jual');
+              const textHarga = elHarga ? elHarga.innerText : '0';
+              const hargaStandar = parseFloat(textHarga.replace(/[^0-9]/g, '')) || 0;
+
+              renderRekomendasiMarketplaceDinamis(hargaStandar);
+            } catch (err) {
+              console.error("Error saat mengolah data marketplace:", err);
+            }
           })
           .withFailureHandler(function(err) {
-            console.error("Gagal memuat data marketplace:", err);
+            console.error("Gagal mengambil data marketplace dari server:", err);
           })
           .getMarketplacePrograms();
       }
     }
 
-    function hitungSimulasiMarketplace() {
-      const elHargaOffline = document.getElementById("text-harga-jual");
-      if (!elHargaOffline) return;
-
-      let targetNet = parseFloat(elHargaOffline.innerText.replace(/[^0-9]/g, "")) || 0;
-      const channels = ["Shopee", "TikTok Shop", "Tokopedia"];
-
-      channels.forEach(ch => {
-        const idTarget = ch === "Shopee" ? "harga-mp-shopee" : ch === "TikTok Shop" ? "harga-mp-tiktok" : "harga-mp-tokopedia";
-        const elResult = document.getElementById(idTarget);
-        if (!elResult) return;
-
-        const listMaster = (typeof window.masterMarketplace !== 'undefined' && Array.isArray(window.masterMarketplace)) ? window.masterMarketplace : [];
-
-        const activeProgram = listMaster.filter(x => {
-          const chName = String(x.channel || x.channelName || x.marketplace || x.namaChannel || '').trim();
-          const matchChannel = chName.toLowerCase() === ch.toLowerCase();
-          const statusVal = x.aktif !== undefined ? x.aktif : (x.statusAktif !== undefined ? x.statusAktif : x.status);
-          const matchStatus = (statusVal === true || String(statusVal).toUpperCase() === "TRUE" || statusVal === 1);
-          return matchChannel && matchStatus;
-        });
-
-        if (activeProgram.length === 0) {
-          elResult.innerText = "Belum ada Program";
-          elResult.className = "font-sans font-normal text-slate-400 text-[11px] italic";
-          return;
-        }
-
-        if (targetNet <= 0) {
-          elResult.innerText = "Rp 0";
-          elResult.className = "font-mono font-bold text-slate-400";
-          return;
-        }
-
-        let totalPersen = 0;
-        let totalFixed = 0;
-
-        activeProgram.forEach(p => {
-          totalPersen += parseFloat(p.persen || p.persenBiaya || p.potonganPersen || p.feePersen || 0);
-          totalFixed += parseFloat(p.fixed || p.fixedFee || p.biayaTetap || 0);
-        });
-
-        let marginDecimal = totalPersen / 100;
-        let hargaJualMP = 0;
-
-        if (marginDecimal < 1) {
-          hargaJualMP = (targetNet + totalFixed) / (1 - marginDecimal);
-        } else {
-          hargaJualMP = targetNet;
-        }
-
-        hargaJualMP = Math.ceil(hargaJualMP / 100) * 100;
-
-        elResult.innerText = `Rp ${hargaJualMP.toLocaleString("id-ID")}`;
-        elResult.className = "font-mono font-bold text-amber-300";
-      });
-    }
-
     function renderTabelMarketplace(data) {
-  const tbody = document.getElementById('tbody-master-mp');
-  if (!tbody) return;
+      const tbody = document.getElementById('tbody-master-mp');
+      if (!tbody) return;
 
-  if (!data || data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada program marketplace terdaftar</td></tr>`;
-    return;
-  }
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada program marketplace terdaftar</td></tr>`;
+        return;
+      }
 
-  let html = '';
-  data.forEach((item, index) => {
-    const isChecked = item.statusAktif;
-    const channel = item.channel || '-';
-    const namaProg = item.namaProgram || '-';
-    const persen = parseFloat(item.persenBiaya || 0);
-    const fixed = parseFloat(item.fixedFee || 0);
-    const rowId = item.rowId;
+      let html = '';
+      data.forEach((item) => {
+        const isChecked = item.statusAktif;
+        const channel = item.channel || '-';
+        const namaProg = item.namaProgram || '-';
+        const persen = parseFloat(item.persenBiaya || 0);
+        const fixed = parseFloat(item.fixedFee || 0);
+        const rowId = item.rowId;
 
-    // Encode data ke string agar aman dilempar ke fungsi edit
-    const itemString = JSON.stringify(item).replace(/"/g, '&quot;');
+        const itemString = JSON.stringify(item).replace(/"/g, '&quot;');
 
-    html += `
-      <tr class="border-b border-slate-700/50 hover:bg-slate-800/50">
-        <td class="p-3 text-center">
-          <input type="checkbox" 
-                 class="w-4 h-4 text-amber-500 rounded border-slate-600 bg-slate-700 focus:ring-amber-400 cursor-pointer"
-                 ${isChecked ? 'checked' : ''} 
-                 onchange="toggleStatusMarketplace(${rowId}, this.checked)">
-        </td>
-        <td class="p-3 font-medium text-slate-200">${channel}</td>
-        <td class="p-3 text-slate-300">${namaProg}</td>
-        <td class="p-3 text-right font-mono text-amber-400">${persen}%</td>
-        <td class="p-3 text-right font-mono text-slate-300">Rp ${fixed.toLocaleString('id-ID')}</td>
-        <td class="p-3 text-center space-x-1">
-          <button onclick="persiapkanEditProgram(${itemString})" title="Edit Program" class="p-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg transition">
-            <i class="fas fa-pencil text-xs"></i>
-          </button>
-          <button onclick="konfirmasiHapusProgram(${rowId}, '${namaProg}')" title="Hapus Program" class="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 rounded-lg transition">
-            <i class="fas fa-trash text-xs"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  });
+        html += `
+          <tr class="border-b border-slate-700/50 hover:bg-slate-800/50">
+            <td class="p-3 text-center">
+              <input type="checkbox" 
+                     class="w-4 h-4 text-amber-500 rounded border-slate-600 bg-slate-700 focus:ring-amber-400 cursor-pointer"
+                     ${isChecked ? 'checked' : ''} 
+                     onchange="toggleStatusMarketplace(${rowId}, this.checked)">
+            </td>
+            <td class="p-3 font-medium text-slate-200">${channel}</td>
+            <td class="p-3 text-slate-300">${namaProg}</td>
+            <td class="p-3 text-right font-mono text-amber-400">${persen}%</td>
+            <td class="p-3 text-right font-mono text-slate-300">Rp ${fixed.toLocaleString('id-ID')}</td>
+            <td class="p-3 text-center space-x-1">
+              <button onclick="persiapkanEditProgram(${itemString})" title="Edit Program" class="p-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg transition">
+                <i class="fas fa-pencil text-xs"></i>
+              </button>
+              <button onclick="konfirmasiHapusProgram(${rowId}, '${namaProg}')" title="Hapus Program" class="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 rounded-lg transition">
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
 
-  tbody.innerHTML = html;
-}
-    // Variabel pengunci global (taruh paling atas script atau luar fungsi)
-let isSavingMarketplace = false;
-
-function simpanProgramMarketplace() {
-  // A. Jika sedang proses simpan, STOP langsung!
-  if (isSavingMarketplace) {
-    console.log("Proses simpan sedang berjalan, mengabaikan klik ganda.");
-    return;
-  }
-
-  const selectChannel = document.getElementById("mp-channel").value;
-  const customChannel = document.getElementById("mp-channel-custom") ? document.getElementById("mp-channel-custom").value.trim() : "";
-  const namaProgram   = document.getElementById("mp-nama-program").value.trim();
-  const persenBiaya   = parseFloat(document.getElementById("mp-persen").value) || 0;
-  const fixedFee      = parseFloat(document.getElementById("mp-fixed").value) || 0;
-  const rowId         = document.getElementById("mp-row-id") ? document.getElementById("mp-row-id").value : "";
-
-  // 1. Validasi Combo-Input
-  let channelFinal = selectChannel;
-  if (selectChannel === "Lainnya") {
-    if (!customChannel) {
-      alert("Nama Channel / Marketplace baru wajib diisi!");
-      document.getElementById("mp-channel-custom").focus();
-      return;
+      tbody.innerHTML = html;
     }
-    channelFinal = customChannel;
-  }
 
-  // 2. Validasi Nama Program
-  if (!namaProgram) {
-    alert("Nama Program/Biaya wajib diisi!");
-    return;
-  }
+    function toggleCustomChannelInput() {
+      const selectChannel = document.getElementById('mp-channel');
+      const inputCustom   = document.getElementById('mp-channel-custom');
+      
+      if (selectChannel && inputCustom) {
+        if (selectChannel.value === 'Lainnya') {
+          inputCustom.classList.remove('hidden');
+          inputCustom.focus();
+        } else {
+          inputCustom.classList.add('hidden');
+          inputCustom.value = '';
+        }
+      }
+    }
 
-  // B. SET FLAG KUNCI & DISABLE TOMBOL
-  isSavingMarketplace = true;
-  const form = document.getElementById('form-master-mp');
-  const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
-  if (btnSubmit) {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
-  }
+    function persiapkanEditProgram(item) {
+      const elRowId   = document.getElementById('mp-row-id');
+      const elChannel = document.getElementById('mp-channel');
+      const elCustom  = document.getElementById('mp-channel-custom');
+      const elNama    = document.getElementById('mp-nama-program');
+      const elPersen  = document.getElementById('mp-persen');
+      const elFixed   = document.getElementById('mp-fixed');
 
-  const payload = {
-    rowId: rowId,
-    channel: channelFinal,
-    namaProgram: namaProgram,
-    persenBiaya: persenBiaya,
-    fixedFee: fixedFee
-  };
+      if (elRowId)  elRowId.value  = item.rowId;
+      if (elNama)   elNama.value   = item.namaProgram || '';
+      if (elPersen) elPersen.value = item.persenBiaya || 0;
+      if (elFixed)  elFixed.value  = item.fixedFee || 0;
 
-  showLoading("Menyimpan Program...", "Mengirim data program ke database");
+      if (elChannel) {
+        const channelTarget = String(item.channel || '').trim().toLowerCase();
+        let isFound = false;
 
-  if (typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(function(res) {
-        // LEPAS KUNCI
-        isSavingMarketplace = false;
-        if (btnSubmit) {
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+        for (let i = 0; i < elChannel.options.length; i++) {
+          if (elChannel.options[i].value.trim().toLowerCase() === channelTarget && elChannel.options[i].value !== 'Lainnya') {
+            elChannel.selectedIndex = i;
+            isFound = true;
+            break;
+          }
         }
 
-        showSuccess("Berhasil!", "Program marketplace berhasil disimpan.", function() {
-          resetFormMarketplace();
-          loadDataMarketplace();
-        });
-      })
-      .withFailureHandler(function(err) {
-        // LEPAS KUNCI JIKA ERROR
-        isSavingMarketplace = false;
-        if (btnSubmit) {
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+        if (!isFound) {
+          elChannel.value = 'Lainnya';
+          if (elCustom) {
+            elCustom.value = item.channel;
+            elCustom.classList.remove('hidden');
+          }
+        } else {
+          if (elCustom) {
+            elCustom.value = '';
+            elCustom.classList.add('hidden');
+          }
         }
+      }
 
-        hideLoading();
-        alert("Gagal menyimpan program: " + err.message);
-      })
-      .simpanProgramMarketplace(payload);
-  } else {
-    isSavingMarketplace = false;
-  }
-}
+      const form = document.getElementById('form-master-mp');
+      const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
+      if (btnSubmit) {
+        btnSubmit.innerHTML = '<i class="fas fa-sync mr-2"></i>UPDATE PROGRAM';
+        btnSubmit.classList.remove('bg-slate-900', 'text-amber-400');
+        btnSubmit.classList.add('bg-blue-600', 'text-white');
+      }
+    }
+
+    function resetFormMarketplace() {
+      const elRowId   = document.getElementById('mp-row-id');
+      const elChannel = document.getElementById('mp-channel');
+      const elCustom  = document.getElementById('mp-channel-custom');
+      const elNama    = document.getElementById('mp-nama-program');
+      const elPersen  = document.getElementById('mp-persen');
+      const elFixed   = document.getElementById('mp-fixed');
+
+      if (elRowId)   elRowId.value   = '';
+      if (elChannel) elChannel.selectedIndex = 0;
+      if (elCustom) {
+        elCustom.value = '';
+        elCustom.classList.add('hidden');
+      }
+      if (elNama)    elNama.value    = '';
+      if (elPersen)  elPersen.value  = '';
+      if (elFixed)   elFixed.value   = '';
+
+      const form = document.getElementById('form-master-mp');
+      const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
+      if (btnSubmit) {
+        btnSubmit.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>SIMPAN PROGRAM';
+        btnSubmit.classList.remove('bg-blue-600', 'text-white');
+        btnSubmit.classList.add('bg-slate-900', 'text-amber-400');
+      }
+    }
+
+    function simpanProgramMarketplace() {
+      if (isSavingMarketplace) return;
+
+      const selectChannel = document.getElementById("mp-channel").value;
+      const customChannel = document.getElementById("mp-channel-custom") ? document.getElementById("mp-channel-custom").value.trim() : "";
+      const namaProgram   = document.getElementById("mp-nama-program").value.trim();
+      const persenBiaya   = parseFloat(document.getElementById("mp-persen").value) || 0;
+      const fixedFee      = parseFloat(document.getElementById("mp-fixed").value) || 0;
+      const rowId         = document.getElementById("mp-row-id") ? document.getElementById("mp-row-id").value : "";
+
+      let channelFinal = selectChannel;
+      if (selectChannel === "Lainnya") {
+        if (!customChannel) {
+          alert("Nama Channel / Marketplace baru wajib diisi!");
+          document.getElementById("mp-channel-custom").focus();
+          return;
+        }
+        channelFinal = customChannel;
+      }
+
+      if (!namaProgram) {
+        alert("Nama Program/Biaya wajib diisi!");
+        return;
+      }
+
+      isSavingMarketplace = true;
+
+      const payload = {
+        rowId: rowId,
+        channel: channelFinal,
+        namaProgram: namaProgram,
+        persenBiaya: persenBiaya,
+        fixedFee: fixedFee
+      };
+
+      Swal.fire({
+        title: 'Menyimpan Program...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            isSavingMarketplace = false;
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil!',
+              text: 'Program marketplace berhasil disimpan.',
+              timer: 1500,
+              showConfirmButton: false
+            });
+
+            resetFormMarketplace();
+            loadDataMarketplace();
+          })
+          .withFailureHandler(function(err) {
+            isSavingMarketplace = false;
+            Swal.fire('Gagal!', err.message, 'error');
+          })
+          .simpanProgramMarketplace(payload);
+      } else {
+        isSavingMarketplace = false;
+      }
+    }
 
     function toggleStatusMarketplace(rowId, status) {
       if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -1749,237 +1774,39 @@ function simpanProgramMarketplace() {
       }
     }
 
-    function resetFormMarketplace() {
-      document.getElementById("form-master-mp").reset();
-      document.getElementById("mp-row-id").value = "";
-    }
-
-    function toggleCustomChannelInput() {
-  const selectChannel = document.getElementById('mp-channel');
-  const inputCustom   = document.getElementById('mp-channel-custom');
-  
-  if (selectChannel && inputCustom) {
-    if (selectChannel.value === 'Lainnya') {
-      inputCustom.classList.remove('hidden');
-      inputCustom.focus();
-    } else {
-      inputCustom.classList.add('hidden');
-      inputCustom.value = '';
-    }
-  }
-}
-
-    // A. Lempar data dari tabel ke Form Kiri saat klik Edit
-// 1. FUNGSI EDIT PROGRAM (Memindahkan Data ke Form Kiri)
-function persiapkanEditProgram(item) {
-  const elRowId   = document.getElementById('mp-row-id');
-  const elChannel = document.getElementById('mp-channel');
-  const elCustom  = document.getElementById('mp-channel-custom');
-  const elNama    = document.getElementById('mp-nama-program');
-  const elPersen  = document.getElementById('mp-persen');
-  const elFixed   = document.getElementById('mp-fixed');
-
-  if (elRowId)  elRowId.value  = item.rowId;
-  if (elNama)   elNama.value   = item.namaProgram || '';
-  if (elPersen) elPersen.value = item.persenBiaya || 0;
-  if (elFixed)  elFixed.value  = item.fixedFee || 0;
-
-  // Cek apakah channel item terdaftar di dropdown bawaan
-  if (elChannel) {
-    const channelTarget = String(item.channel || '').trim().toLowerCase();
-    let isFound = false;
-
-    for (let i = 0; i < elChannel.options.length; i++) {
-      if (elChannel.options[i].value.trim().toLowerCase() === channelTarget && elChannel.options[i].value !== 'Lainnya') {
-        elChannel.selectedIndex = i;
-        isFound = true;
-        break;
-      }
-    }
-
-    // Jika channel tidak ada di list bawaan (misal: "Facebook"), set ke 'Lainnya' dan isi input custom
-    if (!isFound) {
-      elChannel.value = 'Lainnya';
-      if (elCustom) {
-        elCustom.value = item.channel;
-        elCustom.classList.remove('hidden');
-      }
-    } else {
-      if (elCustom) {
-        elCustom.value = '';
-        elCustom.classList.add('hidden');
-      }
-    }
-  }
-
-  // Ubah tombol ke Mode Update
-  const form = document.getElementById('form-master-mp');
-  const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
-  if (btnSubmit) {
-    btnSubmit.innerHTML = '<i class="fas fa-sync mr-2"></i>UPDATE PROGRAM';
-    btnSubmit.classList.remove('bg-slate-900', 'text-amber-400');
-    btnSubmit.classList.add('bg-blue-600', 'text-white');
-  }
-}
-
-// 2. FUNGSI RESET FORM MARKETPLACE
-function resetFormMarketplace() {
-  const elRowId   = document.getElementById('mp-row-id');
-  const elChannel = document.getElementById('mp-channel');
-  const elCustom  = document.getElementById('mp-channel-custom');
-  const elNama    = document.getElementById('mp-nama-program');
-  const elPersen  = document.getElementById('mp-persen');
-  const elFixed   = document.getElementById('mp-fixed');
-
-  if (elRowId)   elRowId.value   = '';
-  if (elChannel) elChannel.selectedIndex = 0;
-  if (elCustom) {
-    elCustom.value = '';
-    elCustom.classList.add('hidden');
-  }
-  if (elNama)    elNama.value    = '';
-  if (elPersen)  elPersen.value  = '';
-  if (elFixed)   elFixed.value   = '';
-
-  // Kembalikan Tombol ke Mode Simpan
-  const form = document.getElementById('form-master-mp');
-  const btnSubmit = form ? form.querySelector('button[type="submit"]') : null;
-  if (btnSubmit) {
-    btnSubmit.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>SIMPAN PROGRAM';
-    btnSubmit.classList.remove('bg-blue-600', 'text-white');
-    btnSubmit.classList.add('bg-slate-900', 'text-amber-400');
-  }
-}
-
-// 3. FUNGSI SIMPAN PROGRAM (Menangani Tambah & Edit tanpa Duplikat)
-function simpanProgramMarketplace() {
-  const selectChannel = document.getElementById("mp-channel").value;
-  const customChannel = document.getElementById("mp-channel-custom") ? document.getElementById("mp-channel-custom").value.trim() : "";
-  const namaProgram   = document.getElementById("mp-nama-program").value.trim();
-  const persenBiaya   = parseFloat(document.getElementById("mp-persen").value) || 0;
-  const fixedFee      = parseFloat(document.getElementById("mp-fixed").value) || 0;
-  const rowId         = document.getElementById("mp-row-id") ? document.getElementById("mp-row-id").value : "";
-
-  // 1. Ambil nama Channel (Combo-Input)
-  let channelFinal = selectChannel;
-  if (selectChannel === "Lainnya") {
-    if (!customChannel) {
-      alert("Nama Channel / Marketplace baru wajib diisi!");
-      document.getElementById("mp-channel-custom").focus();
-      return;
-    }
-    channelFinal = customChannel;
-  }
-
-  // 2. Validasi
-  if (!namaProgram) {
-    alert("Nama Program/Biaya wajib diisi!");
-    return;
-  }
-
-  const payload = {
-    rowId: rowId,
-    channel: channelFinal,
-    namaProgram: namaProgram,
-    persenBiaya: persenBiaya,
-    fixedFee: fixedFee
-  };
-
-  // 3. LOGO MUTER-MUTER DI TENGAH LAYAR + KUNCI DIKLIK (allowOutsideClick: false)
-  Swal.fire({
-    title: 'Menyimpan Program...',
-    text: 'Mohon tunggu sebentar',
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    didOpen: () => {
-      Swal.showLoading(); // Tampilkan animasi lingkaran muter
-    }
-  });
-
-  // 4. Kirim ke Backend
-  if (typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(function(res) {
-        // Tampilkan Notif Berhasil Centang Hijau
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: 'Program marketplace berhasil disimpan.',
-          timer: 1500,
-          showConfirmButton: false
-        });
-
-        resetFormMarketplace();
-        loadDataMarketplace();
-      })
-      .withFailureHandler(function(err) {
-        Swal.fire('Gagal!', err.message, 'error');
-      })
-      .simpanProgramMarketplace(payload);
-  }
-}
-
-// D. Konfirmasi & Hapus Program (SweetAlert2 di Tengah Layar)
-function konfirmasiHapusProgram(rowId, namaProg) {
-  Swal.fire({
-    title: 'Hapus Program?',
-    text: `Apakah Anda yakin ingin menghapus program "${namaProg}"?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#ef4444', // Merah
-    cancelButtonColor: '#64748b',  // Abu-abu / Slate
-    confirmButtonText: 'Ya, Hapus!',
-    cancelButtonText: 'Batal',
-    reverseButtons: true,
-    customClass: {
-      popup: 'rounded-2xl shadow-2xl border border-slate-100',
-      title: 'text-slate-800 font-extrabold text-lg',
-      htmlContainer: 'text-slate-600 text-sm'
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      
-      // Indikator Loading saat proses hapus berjalan
+    function konfirmasiHapusProgram(rowId, namaProgram) {
       Swal.fire({
-        title: 'Menghapus...',
-        text: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
+        title: 'Hapus Program?',
+        text: `Apakah Anda yakin ingin menghapus "${namaProgram}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        customClass: { popup: 'rounded-2xl' }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Menghapus...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run
+              .withSuccessHandler((res) => {
+                Swal.fire({ icon: 'success', title: 'Terhapus!', timer: 1500, showConfirmButton: false });
+                loadDataMarketplace();
+              })
+              .withFailureHandler((err) => {
+                Swal.fire('Gagal!', err.message, 'error');
+              })
+              .hapusProgramMarketplace(rowId);
+          }
         }
       });
-
-      // Kirim perintah hapus ke Backend Code.gs
-      google.script.run
-        .withSuccessHandler(function(res) {
-          if (res.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Terhapus!',
-              text: 'Program berhasil dihapus.',
-              timer: 1500,
-              showConfirmButton: false
-            });
-
-            // Reset form jika item yang dihapus sedang dibuka di form edit
-            const currentEditId = document.getElementById('mp-row-id')?.value;
-            if (currentEditId == rowId) {
-              resetFormMarketplace();
-            }
-
-            // Reload data tabel
-            loadDataMarketplace();
-          } else {
-            Swal.fire('Gagal!', res.message, 'error');
-          }
-        })
-        .withFailureHandler(function(err) {
-          Swal.fire('Error System!', err.message, 'error');
-        })
-        .hapusProgramMarketplace(rowId);
     }
-  });
-}
   </script>
 </body>
 </html>
