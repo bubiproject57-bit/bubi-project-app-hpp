@@ -648,54 +648,58 @@
     }
 
     function switchTab(tabId) {
-      try {
-        const allTabs = document.querySelectorAll('.tab-content');
-        allTabs.forEach(tab => {
-          tab.classList.add('hidden');
-          tab.removeAttribute('style');
-        });
+  try {
+    const allTabs = document.querySelectorAll('.tab-content');
+    allTabs.forEach(tab => {
+      tab.classList.add('hidden');
+      tab.removeAttribute('style');
+    });
 
-        const targetTab = document.getElementById(tabId);
-        if (!targetTab) return;
+    const targetTab = document.getElementById(tabId);
+    if (!targetTab) return;
 
-        targetTab.classList.remove('hidden');
+    targetTab.classList.remove('hidden');
 
-        const navButtons = document.querySelectorAll('aside button, nav button');
-        navButtons.forEach(btn => {
-          btn.classList.remove('bg-amber-500/20', 'text-amber-400', 'border-l-4', 'border-amber-500');
-          const onclickAttr = btn.getAttribute('onclick') || '';
-          if (onclickAttr.includes(`'${tabId}'`)) {
-            btn.classList.add('bg-amber-500/20', 'text-amber-400', 'border-l-4', 'border-amber-500');
-          }
-        });
-
-        if (tabId === 'tab-marketplace' && typeof loadDataMarketplace === 'function') {
-          loadDataMarketplace();
-        } else if (tabId === 'tab-kalkulator') {
-          hitungTotalHPP();
-        }
-      } catch (err) {
-        console.error("Switch tab error:", err);
+    const navButtons = document.querySelectorAll('aside button, nav button');
+    navButtons.forEach(btn => {
+      btn.classList.remove('bg-amber-500/20', 'text-amber-400', 'border-l-4', 'border-amber-500');
+      const onclickAttr = btn.getAttribute('onclick') || '';
+      if (onclickAttr.includes(`'${tabId}'`)) {
+        btn.classList.add('bg-amber-500/20', 'text-amber-400', 'border-l-4', 'border-amber-500');
       }
-    }
+    });
 
-    function loadMasterData() {
-      showLoading("Memuat Data...", "Mengambil master bahan & mesin dari database");
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(onInitialDataLoaded)
-          .withFailureHandler(onFailure)
-          .getInitialData();
-      } else {
-        hideLoading();
-      }
-    }
-
-    function refreshData() {
-      loadMasterData();
+    // Pemicu otomatis berdasarkan tab yang dibuka
+    if (tabId === 'tab-marketplace' && typeof loadDataMarketplace === 'function') {
       loadDataMarketplace();
+    } else if (tabId === 'tab-kalkulator') {
+      hitungTotalHPP();
+    } else if ((tabId === 'tab-katalog' || tabId === 'tab-katalog-order' || tabId === 'section-katalog-order') && typeof loadKatalogDanOrder === 'function') {
+      // Menarik data Master Produk & Master Order saat tab Katalog dibuka
+      loadKatalogDanOrder();
     }
+  } catch (err) {
+    console.error("Switch tab error:", err);
+  }
+}
 
+function loadMasterData() {
+  showLoading("Memuat Data...", "Mengambil master bahan & mesin dari database");
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(onInitialDataLoaded)
+      .withFailureHandler(onFailure)
+      .getInitialData();
+  } else {
+    hideLoading();
+  }
+}
+
+function refreshData() {
+  loadMasterData();
+  if (typeof loadDataMarketplace === 'function') loadDataMarketplace();
+  if (typeof loadKatalogDanOrder === 'function') loadKatalogDanOrder();
+}
     function onInitialDataLoaded(data) {
       hideLoading();
       if (!data) return;
@@ -1011,45 +1015,51 @@
     }
 
     function renderRekomendasiMarketplaceDinamis(hargaJualOffline) {
-      const container = document.getElementById('container-rekomendasi-mp');
-      if (!container) return;
+  const container = document.getElementById('container-rekomendasi-mp');
+  if (!container) return;
 
-      const listPrograms = window.listDataMarketplace || [];
-      const activePrograms = listPrograms.filter(p => p.statusAktif);
+  // Proteksi jika hargaJualOffline undefined, null, atau NaN, set otomatis ke 0
+  const hargaOfflineSafe = parseFloat(hargaJualOffline) || 0;
 
-      if (activePrograms.length === 0) {
-        container.innerHTML = `<div class="text-slate-400 text-[11px] italic text-center py-1">Belum ada program aktif</div>`;
-        return;
-      }
+  const listPrograms = window.listDataMarketplace || [];
+  const activePrograms = listPrograms.filter(p => p.statusAktif);
 
-      // Grouping berdasarkan Channel
-      const grouped = {};
-      activePrograms.forEach(p => {
-        if (!grouped[p.channel]) grouped[p.channel] = { totalPersen: 0, totalFixed: 0 };
-        grouped[p.channel].totalPersen += parseFloat(p.persenBiaya || 0);
-        grouped[p.channel].totalFixed += parseFloat(p.fixedFee || 0);
-      });
+  if (activePrograms.length === 0) {
+    container.innerHTML = `<div class="text-slate-400 text-[11px] italic text-center py-1">Belum ada program aktif</div>`;
+    return;
+  }
 
-      let html = '';
-      for (const [channel, fee] of Object.entries(grouped)) {
-        let marginDecimal = fee.totalPersen / 100;
-        let hargaMP = 0;
-        if (marginDecimal < 1) {
-          hargaMP = (hargaJualOffline + fee.totalFixed) / (1 - marginDecimal);
-        } else {
-          hargaMP = hargaJualOffline;
-        }
-        hargaMP = Math.ceil(hargaMP / 500) * 500;
+  // Grouping berdasarkan Channel
+  const grouped = {};
+  activePrograms.forEach(p => {
+    if (!grouped[p.channel]) grouped[p.channel] = { totalPersen: 0, totalFixed: 0 };
+    grouped[p.channel].totalPersen += parseFloat(p.persenBiaya || 0);
+    grouped[p.channel].totalFixed += parseFloat(p.fixedFee || 0);
+  });
 
-        html += `
-          <div class="flex justify-between items-center text-xs">
-            <span class="text-slate-300 font-medium">${channel}</span>
-            <span class="font-mono font-bold text-amber-300">Rp ${hargaMP.toLocaleString('id-ID')}</span>
-          </div>
-        `;
-      }
-      container.innerHTML = html;
+  let html = '';
+  for (const [channel, fee] of Object.entries(grouped)) {
+    let marginDecimal = fee.totalPersen / 100;
+    let hargaMP = 0;
+    
+    if (marginDecimal < 1) {
+      // Menggunakan hargaOfflineSafe yang sudah aman dari error NaN
+      hargaMP = (hargaOfflineSafe + fee.totalFixed) / (1 - marginDecimal);
+    } else {
+      hargaMP = hargaOfflineSafe;
     }
+    
+    hargaMP = Math.ceil(hargaMP / 500) * 500;
+
+    html += `
+      <div class="flex justify-between items-center text-xs">
+        <span class="text-slate-300 font-medium">${channel}</span>
+        <span class="font-mono font-bold text-amber-300">Rp ${hargaMP.toLocaleString('id-ID')}</span>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
 
     function simpanKalkulasiProduk() {
       const namaProdukInput = document.getElementById('nama-produk');
